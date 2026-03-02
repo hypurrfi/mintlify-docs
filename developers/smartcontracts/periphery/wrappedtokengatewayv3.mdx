@@ -1,0 +1,416 @@
+# WrappedTokenGatewayV3
+
+
+
+The WHYPE Gateway contract is a helper to easily wrap and unwrap HYPE as necessary when interacting with the protocol.
+
+## Write Methods
+
+### depositHYPE
+
+**`function depositHYPE(address pool, address onBehalfOf, uint16 referralCode)`**
+
+Supplies the `msg.value` amount of HYPE (or native chain token) into the HypurrFi pool, minting the same amount of corresponding hyWHYPE and transferring them to the `onBehalfOf` address.
+
+<Note>
+  Ensure that the `depositHYPE()` transaction also includes the amount of HYPE you are supplying in the `msg.value`.
+</Note>
+
+Call Params
+
+| Name         | Type    | Description                                                                                          |
+| ------------ | ------- | ---------------------------------------------------------------------------------------------------- |
+| pool         | address | address of the targeted pool                                                                         |
+| onBehalfOf   | address | address who will receive the hyWHYPE. Use msg.sender when the hyTokens should be sent to the caller. |
+| referralCode | uint16  | <p>unique code for 3rd party referral program integration.<br />0 for no referral.</p>               |
+
+### withdrawHYPE
+
+**`function withdrawHYPE(address pool, uint256 amount, address to)`**
+
+Withdraws `amount` of the WHYPE (or wrapped native chain token), unwraps it and transfers HYPE (or native chain token) to the `to` address.
+
+💡 Ensure you set the relevant \`hyToken\` allowance, before calling this function, so the \`WrappedTokenGatewayV3\` contract can transfer the associated hyWHYPE.
+
+Call Params
+
+| Name   | Type    | Description                                                                                        |
+| ------ | ------- | -------------------------------------------------------------------------------------------------- |
+| pool   | address | address of the targeted pool                                                                       |
+| amount | uint256 | amount to be withdrawn, expressed in wei units. Use type(uint).max to withdraw the entire balance. |
+| to     | address | address that will receive the unwrapped HYPE                                                       |
+
+### repayHYPE
+
+**`function repayHYPE(address pool, uint256 amount, uint256 rateMode, address onBehalfOf)`**
+
+Repays `onBehalfOf`'s debt `amount` of HYPE () which has a `rateMode`.
+
+<Note>
+  Ensure that the `repayHYPE()` transaction also includes the amount of HYPE you are repaying in the `msg.value`.
+</Note>
+
+| Parameter Name | Type    | Description                                                                                                                                                                                                                                                                                                       |
+| -------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| lendingPool    | address | address of the targeted underlying lending pool                                                                                                                                                                                                                                                                   |
+| amount         | uint256 | <p>amount to be borrowed, expressed in wei units.<br />Use uint(-1) to repay the entire debt,  ONLY when the repayment is not executed on behalf of a 3rd party.<br />In case of repayments on behalf of another user, it's recommended to send an \_amount slightly higher than the current borrowed amount.</p> |
+| rateMode       | uint256 | <p>the type of borrow debt.<br />Stable: 1, Variable: 2</p>                                                                                                                                                                                                                                                       |
+| onBehalfOf     | address | <p>address of user who will incur the debt.<br />Use msg.sender when not calling on behalf of a different user.</p>                                                                                                                                                                                               |
+
+### borrowHYPE
+
+**`function borrowHYPE(address pool, uint256 amount, uint256 interestRateMode, uint16 referralCode)`**
+
+Borrows `amount` of WHYPE with `interestRateMode`, sending the `amount` of unwrapped WHYPE to `msg.sender`.
+
+Call Params
+
+| Name             | Type    | Description                                                                                 |
+| ---------------- | ------- | ------------------------------------------------------------------------------------------- |
+| pool             | address | address of the targeted pool                                                                |
+| amount           | uint256 | amount to be borrowed, expressed in wei units                                               |
+| interestRateMode | uint256 | <p>the type of borrow debt.<br />Stable: 1, Variable: 2</p>                                 |
+| referralCode     | uint16  | <p>unique code for 3rd party referral program integration.<br />0 for no referral code.</p> |
+
+### withdrawHYPEWithPermit
+
+`function withdrawHYPEWithPermit(address pool, uint256 amount, address to, uint256 deadline, uint8 permitV, bytes32 permitR, bytes32 permitS)`
+
+Withdraws `amount` of the WHYPE (or wrapped native chain token) without a separate approval tx. The HYPE (or native chain token) is sent to the `to` address.
+
+Call Params
+
+| Name     | Type    | Description                                                                                                                       |
+| -------- | ------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| pool     | address | address of the targeted pool                                                                                                      |
+| amount   | uint256 | amount of hyWHYPE (or hyToken corresponding to native token of chain) that will be burnt to withdraw HYPE (or native chain token) |
+| to       | address | address that will receive the HYPE (or native chain token)                                                                        |
+| deadline | uint256 | unix timestamp till which the signature is valid                                                                                  |
+| permitV  | uint8   | Signature parameter v                                                                                                             |
+| permitR  | bytes32 | Signature parameter r                                                                                                             |
+| permitS  | bytes32 | Signature parameter s                                                                                                             |
+
+#### emergencyTokenTransfer
+
+`function emergencyTokenTransfer(address Token, address to, uint256 amount)`
+
+Method for ERC20 recovery in case of stuck tokens due direct transfers to the contract address.
+
+<Note>
+  Can be called only by the owner of the contract i.e. HypurrFi Governance.
+</Note>
+
+### emergencyHypeTransfer
+
+`function emergencyHypeTransfer(address to, uint256 amount)`
+
+Method for HYPE (or native chain token) recovery in case of stuck HYPE due selfdestruct or transfer ether to pre-computated contract address before deployment.
+
+<Note>
+  Can be called only by the owner of the contract i.e. HypurrFi Governance.
+</Note>
+
+### View
+
+### getWHYPEAddress
+
+**`function getWHYPEAddress()`**
+
+Returns the WHYPE address used by the WrappedTokenGatewayV3.
+
+## ABI
+
+<Accordion title="WrappedTokenGatewayV3 ABI">
+  ```
+  [
+      {
+          "inputs": [
+              {
+                  "internalType": "address",
+                  "name": "weth",
+                  "type": "address"
+              },
+              {
+                  "internalType": "address",
+                  "name": "owner",
+                  "type": "address"
+              }
+          ],
+          "stateMutability": "nonpayable",
+          "type": "constructor"
+      },
+      {
+          "anonymous": false,
+          "inputs": [
+              {
+                  "indexed": true,
+                  "internalType": "address",
+                  "name": "previousOwner",
+                  "type": "address"
+              },
+              {
+                  "indexed": true,
+                  "internalType": "address",
+                  "name": "newOwner",
+                  "type": "address"
+              }
+          ],
+          "name": "OwnershipTransferred",
+          "type": "event"
+      },
+      {
+          "stateMutability": "payable",
+          "type": "fallback"
+      },
+      {
+          "inputs": [
+              {
+                  "internalType": "address",
+                  "name": "pool",
+                  "type": "address"
+              }
+          ],
+          "name": "authorizePool",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+      },
+      {
+          "inputs": [
+              {
+                  "internalType": "address",
+                  "name": "pool",
+                  "type": "address"
+              },
+              {
+                  "internalType": "uint256",
+                  "name": "amount",
+                  "type": "uint256"
+              },
+              {
+                  "internalType": "uint256",
+                  "name": "interesRateMode",
+                  "type": "uint256"
+              },
+              {
+                  "internalType": "uint16",
+                  "name": "referralCode",
+                  "type": "uint16"
+              }
+          ],
+          "name": "borrowHYPE",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+      },
+      {
+          "inputs": [
+              {
+                  "internalType": "address",
+                  "name": "pool",
+                  "type": "address"
+              },
+              {
+                  "internalType": "address",
+                  "name": "onBehalfOf",
+                  "type": "address"
+              },
+              {
+                  "internalType": "uint16",
+                  "name": "referralCode",
+                  "type": "uint16"
+              }
+          ],
+          "name": "depositHYPE",
+          "outputs": [],
+          "stateMutability": "payable",
+          "type": "function"
+      },
+      {
+          "inputs": [
+              {
+                  "internalType": "address",
+                  "name": "to",
+                  "type": "address"
+              },
+              {
+                  "internalType": "uint256",
+                  "name": "amount",
+                  "type": "uint256"
+              }
+          ],
+          "name": "emergencyHypeTransfer",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+      },
+      {
+          "inputs": [
+              {
+                  "internalType": "address",
+                  "name": "token",
+                  "type": "address"
+              },
+              {
+                  "internalType": "address",
+                  "name": "to",
+                  "type": "address"
+              },
+              {
+                  "internalType": "uint256",
+                  "name": "amount",
+                  "type": "uint256"
+              }
+          ],
+          "name": "emergencyTokenTransfer",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+      },
+      {
+          "inputs": [],
+          "name": "getWHYPEAddress",
+          "outputs": [
+              {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+              }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+      },
+      {
+          "inputs": [],
+          "name": "owner",
+          "outputs": [
+              {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+              }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+      },
+      {
+          "inputs": [],
+          "name": "renounceOwnership",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+      },
+      {
+          "inputs": [
+              {
+                  "internalType": "address",
+                  "name": "pool",
+                  "type": "address"
+              },
+              {
+                  "internalType": "uint256",
+                  "name": "amount",
+                  "type": "uint256"
+              },
+              {
+                  "internalType": "uint256",
+                  "name": "rateMode",
+                  "type": "uint256"
+              },
+              {
+                  "internalType": "address",
+                  "name": "onBehalfOf",
+                  "type": "address"
+              }
+          ],
+          "name": "repayHYPE",
+          "outputs": [],
+          "stateMutability": "payable",
+          "type": "function"
+      },
+      {
+          "inputs": [
+              {
+                  "internalType": "address",
+                  "name": "newOwner",
+                  "type": "address"
+              }
+          ],
+          "name": "transferOwnership",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+      },
+      {
+          "inputs": [
+              {
+                  "internalType": "address",
+                  "name": "pool",
+                  "type": "address"
+              },
+              {
+                  "internalType": "uint256",
+                  "name": "amount",
+                  "type": "uint256"
+              },
+              {
+                  "internalType": "address",
+                  "name": "to",
+                  "type": "address"
+              }
+          ],
+          "name": "withdrawHYPE",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+      },
+      {
+          "inputs": [
+              {
+                  "internalType": "address",
+                  "name": "pool",
+                  "type": "address"
+              },
+              {
+                  "internalType": "uint256",
+                  "name": "amount",
+                  "type": "uint256"
+              },
+              {
+                  "internalType": "address",
+                  "name": "to",
+                  "type": "address"
+              },
+              {
+                  "internalType": "uint256",
+                  "name": "deadline",
+                  "type": "uint256"
+              },
+              {
+                  "internalType": "uint8",
+                  "name": "permitV",
+                  "type": "uint8"
+              },
+              {
+                  "internalType": "bytes32",
+                  "name": "permitR",
+                  "type": "bytes32"
+              },
+              {
+                  "internalType": "bytes32",
+                  "name": "permitS",
+                  "type": "bytes32"
+              }
+          ],
+          "name": "withdrawHYPEWithPermit",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+      },
+      {
+          "stateMutability": "payable",
+          "type": "receive"
+      }
+  ]
+  ```
+</Accordion>

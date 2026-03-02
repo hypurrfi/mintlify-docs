@@ -1,0 +1,152 @@
+# Ethereum Vault Connector (EVC)
+
+Advanced features for batching operations and sub-accounts
+
+## What is the EVC?
+
+The Ethereum Vault Connector (EVC) is Mewler's system for enabling advanced transaction patterns. It allows you to:
+
+* Execute multiple operations atomically
+* Use sub-accounts for position isolation
+* Delegate permissions to operators
+* Temporarily violate limits (with deferred checks)
+
+## Batching Operations
+
+The EVC allows you to combine multiple operations into a single atomic transaction. This is useful for:
+
+* Opening leveraged positions
+* Repaying debt and withdrawing collateral in one step
+* Complex DeFi strategies requiring multiple steps
+
+### Example: Opening a Leveraged Position
+
+Without EVC, you'd need multiple transactions:
+
+1. Deposit collateral
+2. Borrow asset
+3. Swap borrowed asset for more collateral
+4. Deposit new collateral
+
+With EVC, all steps happen atomically in one transaction.
+
+## Sub-Accounts
+
+Each wallet address can have up to 256 sub-accounts. Sub-accounts are virtual accounts identified by a sub-account ID (0-255).
+
+### Use Cases
+
+**Position Isolation**: Separate trading strategies or risk profiles:
+
+```
+Main Account (ID: 0)
+├── Sub-account 1: Conservative strategy
+├── Sub-account 2: Aggressive leverage
+└── Sub-account 3: Experimental positions
+```
+
+**Risk Management**: Isolate risky positions from your main account to prevent cross-contamination.
+
+**Testing**: Use sub-accounts to test strategies without affecting your main position.
+
+### Sub-Account Addressing
+
+Sub-accounts are addressed using the format:
+
+```
+address:subAccountId
+```
+
+For example:
+
+* `0x123...abc:0` - Main account
+* `0x123...abc:1` - Sub-account 1
+* `0x123...abc:42` - Sub-account 42
+
+## Operators
+
+Operators are addresses you trust to execute transactions on your behalf. This enables:
+
+* Automated strategies
+* Bot trading
+* DeFi protocol integrations
+* Smart contract automation
+
+### Setting an Operator
+
+You can grant operator permissions to:
+
+* Specific addresses
+* Smart contracts
+* Your own contracts for automation
+
+**Security Note**: Only grant operator permissions to addresses you fully trust, as they can execute transactions on your behalf.
+
+## Deferred Checks
+
+The EVC implements deferred checks, which allow operations to temporarily violate limits as long as the final state is valid.
+
+### How It Works
+
+1. **Start Transaction**: Begin a batch of operations
+2. **Intermediate States**: Some operations might temporarily violate limits (e.g., health score drops below 1.0)
+3. **Final State**: All limits must be satisfied at the end
+4. **Atomic Execution**: Either all operations succeed or all fail
+
+### Example
+
+You want to:
+
+1. Withdraw collateral (would make health score \< 1.0)
+2. Repay debt (brings health score back > 1.0)
+
+Without deferred checks, step 1 would fail. With deferred checks, both steps execute atomically, and the final state (after repayment) is valid.
+
+## EVC Functions
+
+### Batch Operations
+
+```solidity theme={null}
+function batch(bytes[] calldata calls) external;
+```
+
+Execute multiple operations in a single transaction.
+
+### Sub-Account Operations
+
+Operations can specify a sub-account ID to target a specific sub-account.
+
+### Operator Delegation
+
+```solidity theme={null}
+function setOperator(address operator, bool enabled) external;
+```
+
+Enable or disable an operator for your account.
+
+## Best Practices
+
+### Batching
+
+* Group related operations together
+* Consider gas costs (batching can save gas)
+* Ensure final state is always valid
+
+### Sub-Accounts
+
+* Use sub-accounts to isolate different strategies
+* Don't create more sub-accounts than necessary
+* Document which sub-account is for what purpose
+
+### Operators
+
+* Only grant permissions to trusted addresses
+* Regularly review and revoke unused operators
+* Use time-limited permissions when possible
+
+## References
+
+For more technical details:
+
+* [Euler V2 EVC Documentation](https://docs.euler.finance/developers/evc)
+* [Developer Guide: Using the EVC](/mewler/developers/evc-integration)

@@ -1,0 +1,53 @@
+# Contract Addresses
+
+Mewler contract addresses
+
+## Mewler Contracts
+
+The following contracts are deployed for Mewler on HyperEVM mainnet.
+
+For the latest addresses, refer to the [Mewler interfaces repository](https://github.com/euler-xyz/euler-interfaces/tree/master/addresses/999).
+
+<Note>
+  **Looking for pooled or isolated legacy markets?** See the main [Contract Addresses](/developers/addresses) page for HypurrFi Pooled Markets and supporting contract addresses.
+</Note>
+
+### Core Contracts
+
+| Contract                 | Address                                                                                                                  | Description                                            |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------ |
+| **eVaultFactory**        | [0xcF5552580fD364cdBBFcB5Ae345f75674c59273A](https://hyperevmscan.io/address/0xcF5552580fD364cdBBFcB5Ae345f75674c59273A) | Factory for deploying new vaults                       |
+| **eVaultImplementation** | [0x05de079A28386135E048369cdf0Bc4D326d5EBDF](https://hyperevmscan.io/address/0x05de079A28386135E048369cdf0Bc4D326d5EBDF) | Implementation contract for vaults                     |
+| **EVC**                  | [0xceAA7cdCD7dDBee8601127a9Abb17A974d613db4](https://hyperevmscan.io/address/0xceAA7cdCD7dDBee8601127a9Abb17A974d613db4) | Ethereum Vault Connector for batching and sub-accounts |
+| **ProtocolConfig**       | [0x43144f09896F8759DE2ec6D777391B9F05A51128](https://hyperevmscan.io/address/0x43144f09896F8759DE2ec6D777391B9F05A51128) | Protocol configuration and parameters                  |
+| **BalanceTracker**       | [0x05d14f4eDFA7Cbfb90711C2EC5505bcbd49b9cD2](https://hyperevmscan.io/address/0x05d14f4eDFA7Cbfb90711C2EC5505bcbd49b9cD2) | Tracks balances across vaults                          |
+| **SequenceRegistry**     | [0x47618E4CBDcFBf5f21D6594A7e3a4f4683719994](https://hyperevmscan.io/address/0x47618E4CBDcFBf5f21D6594A7e3a4f4683719994) | Registry for operation sequencing                      |
+
+### Periphery Contracts
+
+| Contract             | Address                                                                                                                  | Description                                             |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------- |
+| **EulerEarnFactory** | [0x587DD8285c01526769aB4803e4F02433ddbBc00E](https://hyperevmscan.io/address/0x587DD8285c01526769aB4803e4F02433ddbBc00E) | Factory for deploying earn vaults (ERC-4626 strategies) |
+| **Permit2**          | [0x000000000022D473030F116dDEE9F6B43aC78BA3](https://hyperevmscan.io/address/0x000000000022D473030F116dDEE9F6B43aC78BA3) | Permit2 contract for gasless approvals                  |
+
+### Bridge Contracts
+
+| Contract            | Address                                                                                                                  | Description                          |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------ | ------------------------------------ |
+| **eulOFTAdapter**   | [0x976666e0ae74A8A4059cF1acf706891aDE98C3d1](https://hyperevmscan.io/address/0x976666e0ae74A8A4059cF1acf706891aDE98C3d1) | OFT adapter for EUL token bridging   |
+| **eusdOFTAdapter**  | `0x0000000000000000000000000000000000000000`                                                                             | OFT adapter for eUSD (not deployed)  |
+| **seusdOFTAdapter** | `0x0000000000000000000000000000000000000000`                                                                             | OFT adapter for seUSD (not deployed) |
+
+### Swap Contracts
+
+| Contract                         | Address                                                                                                                  | Description                            |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | -------------------------------------- |
+| **EulerSwapV2Factory**           | [0xFbF2a49CB0cc50F4ccd4eAc826eF1A76D99D29Eb](https://hyperevmscan.io/address/0xFbF2a49CB0cc50F4ccd4eAc826eF1A76D99D29Eb) | Factory for EulerSwap V2 pools         |
+| **EulerSwapV2Implementation**    | [0xC00F0B7d7B4F7cA3d3f79f3892069f41C142dB84](https://hyperevmscan.io/address/0xC00F0B7d7B4F7cA3d3f79f3892069f41C142dB84) | Implementation for swap pools          |
+| **EulerSwapV2Periphery**         | [0x61aFC386b47a11F8721b67Eb1607cFBd9ccE48B1](https://hyperevmscan.io/address/0x61aFC386b47a11F8721b67Eb1607cFBd9ccE48B1) | Periphery contract for swap operations |
+| **EulerSwapV2ProtocolFeeConfig** | [0x434b1072d96ea24967CDe289D3d4d81d2BAD4F30](https://hyperevmscan.io/address/0x434b1072d96ea24967CDe289D3d4d81d2BAD4F30) | Protocol fee configuration for swaps   |
+| **EulerSwapV2Registry**          | [0x7E1Efb6A2009A1FDaDee1c5d6615260AD70c14Fb](https://hyperevmscan.io/address/0x7E1Efb6A2009A1FDaDee1c5d6615260AD70c14Fb) | Registry for swap pools                |
+
+<Note>
+  **Individual vault addresses are not listed here** as they are deployed dynamically. To find vault addresses, query the vault factory, use an indexer (i.e. TheGraph, Ponder, etc.), or check the Mewler application interface. Need help? Join our [Telegram community](https://t.me/+YvsBvSxlQrVhNDkx) or [open a support ticket on Discord](https://discord.com/invite/CvJPEJjBNn).
+</Note>

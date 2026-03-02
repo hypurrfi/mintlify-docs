@@ -1,0 +1,63 @@
+# HypurrFi Swap & LP Provision
+
+Swap aggregator and HypurrFiSwap integrated LP product
+
+HypurrFi Swap includes Swap, the modular front-end swap product, and EulerSwap LP product (HypurrFiSwap)
+
+Swap is a swap aggregator that routes via GlueX for the best available quote on Hyperliquid EVM, including routes through HypurrFiSwap LP as they become available.
+
+Swap via GlueX enables direct asset-to-asset swaps via the best quote aggregated in GlueX. Swap also enables debt and collateral swap functionality in the HypurrFi Pooled Markets.
+
+### Debt Swap
+
+When a user has outstanding debt in an asset, they may swap into another asset via the HypurrFi app without access to the debt asset itself. That means that if you borrow USDC and deposit it into Hyperliquid's HLP, you can swap the debt into another asset for a different borrow rate.
+
+If you borrow USDC and deposit it elsewhere, but the interest rate on it increases past your threashold, debt swap into another asset for a better rate.
+
+### Collateral Swap
+
+Similar to debt swap, if you have one asset as collateral, then without withdrawing and swapping, you can swap within the position.
+
+If you have HYPE deposited as collateral but wish to have collateral that you think will increase in price at a greater rate than HYPE, or earn a higher lending rate, you can swap to it in the protocol and your collateral position is accounted in the new asset.
+
+## HypurrFiSwap LP
+
+HypurrFiSwap LP is the deployment of EulerSwap, an integrated swap LP that taps lending positions to facilitate swaps with deep liquidity from lending markets, and provides additional yield venues for lenders who opt into LP.
+
+HypurrFiSwap is the on-chain exchange layer integrated directly into HypurrFi Markets. It merges a Uniswap v4–compatible AMM with the underlying lending system, creating a unified liquidity environment where the same capital simultaneously supports trading, earning from lending yield, and collateralization.
+
+Traditional AMMs fragment liquidity across isolated pools. HypurrFi Swap removes that fragmentation. Liquidity deposited into HypurrFi Markets can be turned into active swap liquidity without moving funds, enabling higher capital efficiency for market makers, DAOs, token issuers, and sophisticated traders.
+
+Deposits made into HypurrFi Markets can be upgraded into Swap pools through a simple operator installation. The result is a single pool of productive capital capable of:
+
+* Facilitating swaps through AMM mechanics
+* Earning underlying lending yield from borrowers
+* Serving as collateral for additional borrowing or hedging
+
+### Single-Owner Pools
+
+Each HypurrFiSwap LP is controlled by a single LP account rather than a shared pool.
+
+Pool owners design and operate their own liquidity curves, enabling purpose-built markets rather than generic AMM pools.
+
+### Core Features
+
+**Just-in-Time (JIT) Liquidity**: If a pool lacks enough output tokens during a trade, HypurrFiSwap can borrow the needed tokens automatically using the LP's deposited assets as collateral. This allows up to \~50× apparent depth in correlated or low-volatility pairs.
+
+JIT liquidity is especially effective for stables, pegged assets, and high-volume pairs.
+
+**Integrated hedging and IL management**: Because reserves sit inside HypurrFi Markets, LPs can borrow against their own inventory.
+
+**Shared Liquidity Layer**: A single asset inside HypurrFi Markets can support multiple Swap pools simultaneously. For example, the same USDC deposit can provide liquidity across several trading pairs at once. This dramatically increases capital efficiency across the ecosystem.
+
+**Uniswap v4 Compatibility**: HypurrFi Swap uses the Uniswap v4 hook architecture, providing a familiar swap UX, full routing and solver integration, execution logic augmented by lending-aware hooks
+
+## HypurrFi Use Case
+
+Beyond additional swap liquidity, HypurrFiSwap is a tool to bootstrap more liquidity on HyperEVM.
+
+New HyperEVM assets pair with USDXL on Balancer initially for base DEX liquidity, which enables asset listing on HypurrFi Markets and HypurrFiSwap. This vastly increases DEX liquidity for swaps and looping trades on HyperEVM, generating fees and yield from idle capital.
+
+<Note>
+  HypurrFi Swap LP (EulerSwap) requires active management of debt and collateral positions in an LP structure different from typical AMM designs. It is reccomended for active curators and Market Makers. More information about HypurrFiSwap LP will be made available as markets mature.
+</Note>

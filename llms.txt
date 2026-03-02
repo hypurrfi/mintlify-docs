@@ -1,0 +1,64 @@
+# HypurrFi
+
+## Docs
+
+- [Brand Assets](https://docs.hypurr.fi/brand-assets/brand-assets.md): Official HypurrFi brand assets for public use
+- [Contract Addresses](https://docs.hypurr.fi/developers/addresses.md)
+- [ACLManager](https://docs.hypurr.fi/developers/smartcontracts/core/accesscontrolmanager.md)
+- [HyFiOracle](https://docs.hypurr.fi/developers/smartcontracts/core/hyfioracle.md)
+- [HyFiProtocolDataProvider](https://docs.hypurr.fi/developers/smartcontracts/core/hyfiprotocoldataprovider.md)
+- [HyToken](https://docs.hypurr.fi/developers/smartcontracts/core/hytoken.md)
+- [Pool](https://docs.hypurr.fi/developers/smartcontracts/core/pool.md)
+- [PoolAddressesProvider](https://docs.hypurr.fi/developers/smartcontracts/core/pooladdressesprovider.md)
+- [PoolAddressesProviderRegistry](https://docs.hypurr.fi/developers/smartcontracts/core/pooladdressesproviderregistry.md)
+- [PoolConfigurator](https://docs.hypurr.fi/developers/smartcontracts/core/poolconfigurator.md)
+- [VariableDebtToken](https://docs.hypurr.fi/developers/smartcontracts/core/variabledebttoken.md)
+- [RewardsController](https://docs.hypurr.fi/developers/smartcontracts/periphery/rewardscontroller.md)
+- [UiIncentiveDataProviderV3](https://docs.hypurr.fi/developers/smartcontracts/periphery/uiincentivedataproviderv3.md)
+- [UiPoolDataProviderV3](https://docs.hypurr.fi/developers/smartcontracts/periphery/uipooldataproviderv3.md)
+- [WalletBalanceProvider](https://docs.hypurr.fi/developers/smartcontracts/periphery/walletbalanceprovider.md)
+- [WrappedTokenGatewayV3](https://docs.hypurr.fi/developers/smartcontracts/periphery/wrappedtokengatewayv3.md)
+- [Hyperliquid Resources](https://docs.hypurr.fi/education/hyperliquid-resources.md): Resources and documentation for Hyperliquid ecosystem
+- [HypurrFi Media Library](https://docs.hypurr.fi/education/media-library.md)
+- [Onchain Lending Fundamentals](https://docs.hypurr.fi/education/onchain-lending-fundamentals.md)
+- [Ethereum Vault Connector (EVC)](https://docs.hypurr.fi/mewler/concepts/evc.md): Advanced features for batching operations and sub-accounts
+- [Interest Rate Models](https://docs.hypurr.fi/mewler/concepts/interest-rate-models.md): How interest rates are calculated in Mewler vaults
+- [Liquidations](https://docs.hypurr.fi/mewler/concepts/liquidations.md): Understanding liquidation mechanics in Mewler
+- [Vaults](https://docs.hypurr.fi/mewler/concepts/vaults.md): Understanding Mewler vaults and how they work
+- [Contract Addresses](https://docs.hypurr.fi/mewler/developers/addresses.md): Mewler contract addresses
+- [EVC Integration](https://docs.hypurr.fi/mewler/developers/evc-integration.md): How to integrate the Ethereum Vault Connector into your application
+- [Developer Overview](https://docs.hypurr.fi/mewler/developers/overview.md): Getting started with Mewler development
+- [Creating Vaults](https://docs.hypurr.fi/mewler/developers/vault-creation.md): How to deploy your own Mewler vault
+- [FAQ](https://docs.hypurr.fi/mewler/faq.md): Frequently asked questions about Mewler
+- [Getting Started with Mewler](https://docs.hypurr.fi/mewler/getting-started.md)
+- [Borrow](https://docs.hypurr.fi/mewler/user-guide/borrow.md): Learn how to borrow assets using collateral in Mewler
+- [Lend](https://docs.hypurr.fi/mewler/user-guide/lend.md): Learn how to lend assets in Mewler vaults to earn yield
+- [Risk Management](https://docs.hypurr.fi/mewler/user-guide/risk-management.md): How to manage risk when using Mewler
+- [About HypurrFi](https://docs.hypurr.fi/multiply-your-money/about-hypurrfi.md)
+- [HypurrFi TLDR](https://docs.hypurr.fi/multiply-your-money/hypurrfi-tldr.md): Trade, Earn, Spend, Grow
+- [Team](https://docs.hypurr.fi/multiply-your-money/team.md)
+- [Block Size Toggle](https://docs.hypurr.fi/products/block-size-toggle.md)
+- [Swype.fun Credit Card](https://docs.hypurr.fi/products/card.md): Spend directly against your on-chain positions without selling assets
+- [HypurrFi Earn Vaults](https://docs.hypurr.fi/products/earn-vaults.md): Curated DeFi and trading strategies for passive yield generation
+- [HYFI](https://docs.hypurr.fi/products/hyfi.md)
+- [HyperScan.com](https://docs.hypurr.fi/products/hyperscan.md): Hyperliquid EVM blockchain explorer
+- [Introduction](https://docs.hypurr.fi/products/hypurrfi-markets.md): Euler Markets on Hyperliquid
+- [Legacy Isolated Markets](https://docs.hypurr.fi/products/legacy-markets.md): HypurrFi v1 isolated markets for contained risk
+- [PKMN](https://docs.hypurr.fi/products/pkmn.md): Index of high value Pokemon collectibles as a spot, perpetuals, and lending market asset
+- [Points](https://docs.hypurr.fi/products/points.md): Weekly distribution to active HypurrFi users
+- [Pooled Markets](https://docs.hypurr.fi/products/pooled-markets.md): HypurrFi pooled markets enable lending, borrowing, and leveraged positions
+- [Purrps (alpha)](https://docs.hypurr.fi/products/purrps.md): HypurrFi DEX with integrated lending and spend
+- [HypurrFi Swap & LP Provision](https://docs.hypurr.fi/products/swap-lp.md): Swap aggregator and HypurrFiSwap integrated LP product
+- [USDXL](https://docs.hypurr.fi/products/usdxl.md)
+- [Audits](https://docs.hypurr.fi/risk-security/audits.md): Security audits and reviews for HypurrFi and partner protocols
+- [HypurrFi Risk Management](https://docs.hypurr.fi/risk-security/overview.md)
+
+## OpenAPI Specs
+
+- [openapi](https://docs.hypurr.fi/api-reference/openapi.json)
+
+## Optional
+
+- [Website](https://hypurr.fi)
+- [Community](https://t.me/+YvsBvSxlQrVhNDkx)
+- [Socials](https://x.com/hypurrfi)

@@ -1,0 +1,252 @@
+# Creating Vaults
+
+How to deploy your own Mewler vault
+
+## Overview
+
+Mewler allows anyone to deploy isolated lending vaults using the Mewler Vault Kit (MVK). This guide walks through the process of creating a new vault.
+
+## Prerequisites
+
+* Understanding of Mewler vault mechanics
+* Access to deployment tools (Foundry, Hardhat, etc.)
+* Tokens for the vault's underlying asset
+* Configuration parameters ready
+
+## Vault Factory
+
+Vaults are deployed through the Vault Factory contract:
+
+**Address**: `0xcF5552580fD364cdBBFcB5Ae345f75674c59273A`
+
+The factory uses a minimal proxy pattern (EIP-1167) to deploy gas-efficient vault instances.
+
+## Deployment Process
+
+### Step 1: Prepare Configuration
+
+Before deploying, you need to define:
+
+```solidity theme={null}
+struct VaultConfig {
+    address underlying;           // The ERC-20 token for this vault
+    address interestRateModel;    // IRM contract address
+    address oracleAdapter;        // Oracle adapter address
+    uint256 collateralFactor;    // Max LTV (e.g., 7500 = 75%)
+    uint256 liquidationThreshold; // Liquidation threshold
+    uint256 liquidationDiscount; // Discount for liquidators (e.g., 1000 = 10%)
+    bool isBorrowable;            // Can users borrow this asset?
+    address[] hookTargets;        // Optional hook contracts
+}
+```
+
+### Step 2: Deploy Vault
+
+```solidity theme={null}
+import { IVaultFactory } from "./interfaces/IVaultFactory.sol";
+
+IVaultFactory factory = IVaultFactory(0xcF5552580fD364cdBBFcB5Ae345f75674c59273A);
+
+VaultConfig memory config = VaultConfig({
+    underlying: address(usdc),
+    interestRateModel: address(linearIRM),
+    oracleAdapter: address(pythAdapter),
+    collateralFactor: 7500, // 75%
+    liquidationThreshold: 8000, // 80%
+    liquidationDiscount: 1000, // 10%
+    isBorrowable: true,
+    hookTargets: new address[](0)
+});
+
+address vaultAddress = factory.deployVault(config);
+```
+
+### Step 3: Initialize Vault
+
+After deployment, the vault needs to be initialized:
+
+```solidity theme={null}
+IVault vault = IVault(vaultAddress);
+vault.initialize(
+    config.underlying,
+    config.interestRateModel,
+    config.oracleAdapter,
+    // ... other parameters
+);
+```
+
+## Configuration Parameters
+
+### Underlying Asset
+
+The ERC-20 token that the vault will accept deposits for and allow borrowing of (if borrowable).
+
+**Considerations**:
+
+* Token must be a standard ERC-20
+* Should have sufficient liquidity
+* Oracle must support the token
+
+### Interest Rate Model
+
+Choose or deploy an IRM that fits your use case:
+
+* **Linear IRM**: Simple, predictable rates
+* **Kinked IRM**: Optimal utilization point
+* **Custom IRM**: Deploy your own model
+
+See [Interest Rate Models](/mewler/concepts/interest-rate-models) for details.
+
+### Oracle Adapter
+
+Select an oracle adapter that supports your underlying asset:
+
+* **Pyth Adapter**: For Pyth Network price feeds
+* **Chainlink Adapter**: For Chainlink oracles
+* **Custom Adapter**: Deploy your own
+
+**Important**: Oracle must be reliable and update frequently enough for your use case.
+
+### Collateral Factor
+
+The maximum Loan-to-Value ratio (0-10000, where 10000 = 100%).
+
+**Typical Values**:
+
+* Stablecoins: 80-90%
+* Major assets (ETH, BTC): 75-85%
+* Altcoins: 50-75%
+* Volatile assets: 30-50%
+
+### Liquidation Threshold
+
+The health score at which liquidation becomes possible (typically higher than collateral factor to provide buffer).
+
+### Liquidation Discount
+
+The bonus liquidators receive (in basis points, e.g., 1000 = 10%).
+
+**Typical Values**: 5-15%
+
+### Borrowable Flag
+
+Set to `true` if users can borrow the underlying asset, `false` for collateral-only vaults.
+
+### Hook Targets
+
+Optional addresses that implement hook interfaces for custom logic:
+
+* Access control
+* Custom validation
+* Event logging
+* Integration with other protocols
+
+## Example: Deploying a USDC Vault
+
+```solidity theme={null}
+// Deploy a USDC borrowable vault
+VaultConfig memory usdcConfig = VaultConfig({
+    underlying: 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48, // USDC
+    interestRateModel: 0x..., // Linear IRM address
+    oracleAdapter: 0x..., // Pyth adapter address
+    collateralFactor: 8500, // 85% LTV
+    liquidationThreshold: 9000, // 90% threshold
+    liquidationDiscount: 1000, // 10% discount
+    isBorrowable: true,
+    hookTargets: new address[](0)
+});
+
+address usdcVault = factory.deployVault(usdcConfig);
+```
+
+## Governance Considerations
+
+### Immutable vs Upgradeable
+
+Vaults can be deployed as:
+
+* **Immutable**: Parameters cannot be changed (more trustless)
+* **Upgradeable**: Parameters can be updated by governance (more flexible)
+
+### Risk Stewards
+
+Consider who can modify vault parameters:
+
+* Protocol governance
+* Risk steward contracts
+* Vault creator
+* No one (immutable)
+
+## Testing Your Vault
+
+Before deploying to mainnet:
+
+1. **Deploy to Testnet**
+   * Test all operations
+   * Verify parameters
+   * Test edge cases
+
+2. **Security Review**
+   * Code review
+   * Consider audits
+   * Test with small amounts first
+
+3. **Parameter Validation**
+   * Verify oracle works correctly
+   * Test IRM behavior
+   * Validate liquidation mechanics
+
+## Best Practices
+
+### Parameter Selection
+
+* **Conservative First**: Start with lower LTVs and higher liquidation thresholds
+* **Monitor Closely**: Watch utilization and adjust if needed
+* **Document Decisions**: Record why you chose specific parameters
+
+### Oracle Selection
+
+* Use reputable oracles
+* Ensure frequent updates
+* Have backup oracles if possible
+* Monitor for staleness
+
+### IRM Selection
+
+* Match IRM to asset characteristics
+* Consider target utilization
+* Test rate behavior under different scenarios
+
+## Post-Deployment
+
+After deploying your vault:
+
+1. **Verify on Block Explorer**
+   * Verify contract code
+   * Check parameters
+   * Verify initialization
+
+2. **Add to Registry**
+   * Register with Mewler interfaces
+   * Update documentation
+   * List in UI (if applicable)
+
+3. **Monitor**
+   * Watch utilization
+   * Monitor health scores
+   * Track liquidations
+   * Adjust parameters if needed
+
+## Need Help?
+
+If you have questions about vault creation or need assistance:
+
+* Join our [Telegram community](https://t.me/+YvsBvSxlQrVhNDkx) for discussions
+* [Open a support ticket on Discord](https://discord.com/invite/CvJPEJjBNn)
+
+## References
+
+* [Vault Concepts](/mewler/concepts/vaults)
+* [Interest Rate Models](/mewler/concepts/interest-rate-models)
+* [Contract Addresses](/developers/addresses)
+* [Euler V2 Vault Creation](https://docs.euler.finance/developers/vault-creation)

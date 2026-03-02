@@ -1,0 +1,89 @@
+# HypurrFi Risk Management
+
+
+
+HypurrFi prioritizes risk management and safety in every deployment we make to the platform. Trustless smart contracts are designed to do exactly what they're told, but the assets added to markets, the parameters set for each market, the pairs of lending assets are all examples of thoughtful risk and security vectors HypurrFi takes into consideration.
+
+HypurrFi provides permissionless access to liquidity on the Hyperliquid EVM, but quality risk management is critical for safe protocol operation and use.
+
+## Smart Contract Risk
+
+Smart contracts can contain software bugs or other vulnerabilities within the protocol code and the underlying reserve tokens.
+
+HypurrFi exclusively uses [audited](/risk-security/audits), production-proven primitives:
+
+### Independent Risk Oversight
+
+**Objective Labs** - HypurrFi partners with Objective Labs for independent risk oversight and data-driven risk assessment. Learn more about the [partnership](https://www.objectivelabs.io/blog/hypurrfi).
+
+## Asset Listing and Market Parameters
+
+HypurrFi works with Objective Labs to review conditions for listing assets in each market, what asset pairs can be associated with each other, liquidity conditions on Hyperliquid and market conditions impacting liquidity, loan-to-value ratios for asset pairs, and other relevant risk parameters.
+
+Broadly, assets must have a clearly understood backing mechanism; a consistent, secure, and accurate price oracle; plus sufficient liquidity against relevant pairs in the event of liquidations to prevent bad protocol debt.
+
+For in-depth liquidity and market monitoring please see [Objective Labs' HypurrFi Risk Dashboard](https://app.hex.tech/0198d84b-fa22-7008-b7c8-7185095e405f/app/HypurrFi-031LBkXBCZ2Y40ivdvVJwG/latest).
+
+## Oracle Risks
+
+HypurrFi relies on third-party oracles for price feeds and external data, such as redemption ratios for liquid staking tokens.
+
+This reliance introduces potential risks such as incorrect valuations if an oracle fails or is compromised.
+
+HypurrFi uses Pyth oracle data at launch and will pursue additional robust decentralized oracle data as it becomes available on Hyperliquid EVM. HypurrFi also integrates Redstone oracles for additional price feed redundancy.
+
+## Collateral Risks
+
+HypurrFi governance engages ongoing risk service providers who track collateral performance and market stability.
+
+The value and liquidity of assets used as collateral can fluctuate, leading to the risk of under collateralization or bad debt.
+
+HypurrFi mitigates these risks by setting key risk parameters such as loan-to-value (LTV) ratios and liquidation thresholds.
+
+These parameters are continuously monitored by risk service providers and can be adjusted by HypurrFi governance to respond to market conditions.
+
+## Security Monitoring
+
+HypurrFi contracts with several veteran security firms for front-end, backend, onchain, phishing, and hardware opsec monitoring.
+
+### Pooled Markets
+
+**Aave V3** - HypurrFi's pooled markets are based on Aave V3's open-source code, which has undergone significant third-party professional audits. Specifically, it uses the Aave V3.0.2 codebase.
+
+Notable code differences between HypurrFi and Aave V3 include:
+
+* Stable debt is not supported.
+* The RewardsController is not available currently.
+* Reserve assets are configured specifically for the Hyperliquid EVM ecosystem.
+
+### Legacy (Isolated) Markets
+
+**Fraxlend** - HypurrFi's legacy isolated lending markets are based on Fraxlend's open-source code, which has also undergone extensive third-party audits. See [Fraxlend audits](https://docs.frax.com/protocol/security/audit).
+
+### HypurrFi Markets
+
+**Euler's next-gen vault stack** - Earn & Frontier. See [Euler Earn audits](https://docs.euler.finance/security/earn-audits/).
+
+### Swap Infrastructure
+
+**GlueX** - Swap powered by GlueX. See [GlueX audits](https://github.com/gluexprotocol/gluex-audits).
+
+### USDXL
+
+**GHO on Aave v3** - USDXL is forked from GHO on Aave v3. See [Aave security audits](https://aave.com/security#:~:text=Apr%2030%202024-,GHO%20Audits,-View%20Contracts).
+
+### Purrps
+
+**Hyperliquid Builder Codes** - Purrps powered by Hyperliquid Builder Codes. See [Hyperliquid audits](https://hyperliquid.gitbook.io/hyperliquid-docs/audits).
+
+### Bridge
+
+**Enso** - Bridge powered by Enso. See [Enso audits](https://github.com/EnsoBuild/enso-audits).
+
+### Price Oracles
+
+**Pyth & Redstone** - Price oracles from Pyth and Redstone. See [Pyth audit reports](https://github.com/pyth-network/audit-reports) and [Redstone security audits](https://docs.redstone.finance/docs/security/audits/).
+
+## Smart Contract Audits
+
+For detailed audit reports, see the [Audits](/risk-security/audits) page, which includes all HypurrFi audits and comprehensive links to partner protocol audits.

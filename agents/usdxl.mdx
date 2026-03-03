@@ -1,0 +1,96 @@
+---
+title: "USDXL Agent Reference"
+description: "Agent-readable reference for USDXL, HypurrFi's CDP-hybrid synthetic dollar on HyperEVM."
+---
+
+## What is USDXL
+
+USDXL is a Hyperliquid-native **CDP-hybrid synthetic dollar** (forked from GHO on Aave V3). It is backed by debt positions in Pooled Markets and HypurrFi Markets, plus a partial reserve of USDT0 in a hybrid model.
+
+**USDXL is NOT a stablecoin.** Always refer to it as a "CDP-hybrid synthetic dollar."
+
+USDXL is mintable as a CDP from Pooled Markets (Aave V3) or directly with USDT0. It is not a separate lending system — it is an asset within the existing lending systems.
+
+---
+
+## How to Get USDXL
+
+### Option 1: Mint via Pooled Markets (CDP Borrow)
+
+Supply collateral to Pooled Markets, then borrow USDXL as a variable-rate debt position.
+
+```typescript
+const POOL_ADDRESS = "0xceCcE0EB9DD2Ef7996e01e25DD70e461F918A14b";
+const poolABI = [
+  "function supply(address asset, uint256 amount, address onBehalfOf, uint16 referralCode) external",
+  "function borrow(address asset, uint256 amount, uint256 interestRateMode, uint16 referralCode, address onBehalfOf) external",
+  "function repay(address asset, uint256 amount, uint256 interestRateMode, address onBehalfOf) external returns (uint256)",
+  "function getReservesList() external view returns (address[] memory)",
+];
+
+const pool = new ethers.Contract(POOL_ADDRESS, poolABI, signer);
+
+// 1. Supply collateral (e.g., HYPE, wstHYPE, ETH)
+const collateralToken = new ethers.Contract(collateralAddress, erc20ABI, signer);
+await (await collateralToken.approve(POOL_ADDRESS, collateralAmount)).wait();
+await (await pool.supply(collateralAddress, collateralAmount, signer.address, 0)).wait();
+
+// 2. Borrow USDXL (interestRateMode 2 = variable; stable NOT supported)
+const USDXL_ADDRESS = "0x..."; // query from pool.getReservesList()
+await (await pool.borrow(USDXL_ADDRESS, borrowAmount, 2, 0, signer.address)).wait();
+```
+
+### Option 2: Mint with USDT0
+
+USDXL can be minted directly using USDT0 via a facilitator contract. Check the app for the current mint interface.
+
+---
+
+## Repaying USDXL
+
+### Via Pooled Markets
+
+```typescript
+const usdxl = new ethers.Contract(USDXL_ADDRESS, erc20ABI, signer);
+await (await usdxl.approve(POOL_ADDRESS, repayAmount)).wait();
+// Use ethers.MaxUint256 to repay full debt
+await (await pool.repay(USDXL_ADDRESS, repayAmount, 2, signer.address)).wait();
+```
+
+---
+
+## Dynamic Borrow Rate
+
+USDXL uses a target rate that responds to real market conditions. When USDXL deviates from its $1 peg target, the borrow rate adjusts dynamically to encourage market activity that restores the peg.
+
+Interest rates are variable and change continuously — do not hardcode or quote specific rates.
+
+---
+
+## Use Cases
+
+### Provide Liquidity on Balancer
+
+- **USDXL/hyUSDT0** — stableswap pool
+- **USDXL/HYPE** — HYPE exposure alongside USDXL
+
+LPs earn swap fees plus boosted incentives funded by USDXL borrow revenue.
+
+### Other
+
+Additional deposit and yield opportunities for USDXL are expanding across the Hyperliquid DeFi ecosystem.
+
+---
+
+## Important Notes
+
+- USDXL is a **CDP-hybrid synthetic dollar**, not a stablecoin
+- Backed by debt positions + USDT0 partial reserve in a hybrid model
+- Direct redemptions are not currently enabled but planned for the future
+- Borrow rates are dynamic and respond to peg conditions
+- Contract details are limited — this page will be expanded as more integration info is documented
+
+## Support
+
+- Telegram: [HypurrFi Community](https://t.me/+YvsBvSxlQrVhNDkx)
+- Discord: [Support Ticket](https://discord.com/invite/CvJPEJjBNn)

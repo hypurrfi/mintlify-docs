@@ -1,0 +1,66 @@
+---
+title: "Liquidations"
+description: "How liquidations work on HypurrFi and how to avoid them"
+---
+
+## What Is a Liquidation?
+
+When you borrow assets on HypurrFi, your collateral must always be worth more than your debt. If the value of your collateral drops (or your debt grows from accrued interest) past a certain threshold, your position becomes eligible for **liquidation**.
+
+Liquidation means a third party (a "liquidator") repays part of your debt and receives a portion of your collateral in return — at a discount. This protects the protocol and lenders from bad debt.
+
+## How It Works
+
+Every borrowing position has a **health score** (also called a health factor):
+
+- **Health score > 1.0** — your position is safe
+- **Health score = 1.0** — you are at the liquidation threshold
+- **Health score < 1.0** — your position can be liquidated
+
+The health score is calculated as:
+
+**Health Score = (Collateral Value × Liquidation Threshold) / Total Debt Value**
+
+When your health score drops below 1.0, liquidators can step in.
+
+## Partial Liquidations
+
+HypurrFi uses **partial liquidations** — liquidators do not seize your entire position. Instead:
+
+- A liquidator repays a **portion** of your debt (typically up to 50% per liquidation event in Pooled Markets)
+- They receive an equivalent amount of your collateral **plus a liquidation penalty** (e.g., ~5–10% depending on the asset and market)
+- Your remaining position continues with an improved health score
+
+This means you don't lose everything in a single liquidation event. However, repeated partial liquidations can still significantly reduce your collateral.
+
+In HypurrFi Markets (Euler-based), liquidation mechanics use a **Dutch auction** style where the discount offered to liquidators increases over time, encouraging efficient liquidation at the minimum cost to borrowers.
+
+## What Triggers a Liquidation?
+
+- **Collateral price drops** — if the market value of your collateral falls
+- **Debt value increases** — accrued interest grows your total debt over time
+- **Volatile market conditions** — rapid price swings can push positions past the threshold quickly
+
+## How to Avoid Liquidation
+
+1. **Monitor your health score** — check your positions regularly, especially during volatile markets
+2. **Maintain a buffer** — don't borrow up to your maximum LTV. A larger buffer gives you more room
+3. **Add collateral** — deposit more collateral to improve your health score
+4. **Repay debt** — partially repay your borrow to reduce your debt and raise your health score
+5. **Use correlated assets** — borrowing assets correlated with your collateral (e.g., stablecoin collateral with stablecoin debt) reduces liquidation risk from price swings
+6. **Set alerts** — use on-chain monitoring tools or portfolio trackers to get notified when your health score drops
+
+## Liquidation Penalties
+
+The liquidation penalty varies by market and asset:
+
+- **Pooled Markets (Aave V3)** — fixed penalty per asset, typically 5–10%
+- **HypurrFi Markets (Euler V2)** — Dutch auction mechanism that minimizes the penalty paid by the borrower
+
+The penalty is the "bonus" the liquidator earns for clearing your debt. It comes out of your collateral.
+
+## Key Takeaways
+
+- Liquidation is not instant total loss — it's partial and leaves you with a healthier remaining position
+- Your best defense is maintaining a comfortable health score buffer
+- Different market types (Pooled vs. HypurrFi Markets) have different liquidation mechanics, but the core concept is the same: keep your health score above 1.0

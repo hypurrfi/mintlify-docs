@@ -1,0 +1,145 @@
+---
+title: "Liquidation Guide"
+description: "How to build liquidation bots for HypurrFi Pooled Markets"
+---
+
+## Overview
+
+When a borrower's health factor drops below 1.0 in Pooled Markets, anyone can call `liquidationCall` on the Pool contract to repay part of the debt and receive discounted collateral. This guide covers the mechanics and provides integration examples.
+
+<Note>
+  For Mewler (Euler V2) liquidation mechanics, see the [HypurrFi Markets Agent Reference](/agents/hypurrfi-markets#liquidations).
+</Note>
+
+## How Liquidation Works
+
+### Health Factor
+
+```
+Health Factor = (Σ collateral_value × liquidation_threshold) / Σ debt_value
+```
+
+- **HF > 1.0** → position is safe
+- **HF = 1.0** → at liquidation threshold
+- **HF < 1.0** → position can be liquidated
+
+Query a user's health factor:
+
+```typescript
+const pool = new ethers.Contract(POOL_ADDRESS, poolABI, provider);
+const data = await pool.getUserAccountData(userAddress);
+// data.healthFactor is in wei (1e18 = 1.0)
+const healthFactor = Number(data.healthFactor) / 1e18;
+```
+
+### Close Factor
+
+Liquidators can repay up to **50%** of the borrower's debt in a single `liquidationCall`. Setting `debtToCover` to `type(uint256).max` will liquidate the maximum allowed amount.
+
+### Liquidation Bonus
+
+Liquidators receive collateral at a discount. The bonus varies per asset and is encoded in the reserve configuration bitmap (bits 32–47). Typical values are 5–10%.
+
+---
+
+## Pool.liquidationCall
+
+```solidity
+function liquidationCall(
+    address collateralAsset,
+    address debtAsset,
+    address user,
+    uint256 debtToCover,
+    bool receiveAToken
+) external
+```
+
+| Parameter       | Description                                                                 |
+| --------------- | --------------------------------------------------------------------------- |
+| collateralAsset | Address of the collateral reserve to seize                                  |
+| debtAsset       | Address of the debt reserve to repay                                        |
+| user            | Address of the borrower being liquidated                                    |
+| debtToCover     | Amount of debt to repay. Use `type(uint256).max` for maximum (50% of debt) |
+| receiveAToken   | `true` to receive hyTokens, `false` to receive the underlying asset        |
+
+<Note>
+  The liquidator must `approve()` the Pool contract to spend `debtToCover` of the `debtAsset` before calling `liquidationCall`.
+</Note>
+
+---
+
+## Integration Example
+
+### 1. Monitor Positions
+
+```typescript
+const pool = new ethers.Contract(POOL_ADDRESS, poolABI, provider);
+
+async function findLiquidatablePositions(users: string[]) {
+  const liquidatable = [];
+  for (const user of users) {
+    const data = await pool.getUserAccountData(user);
+    const hf = Number(data.healthFactor) / 1e18;
+    if (hf < 1.0) {
+      liquidatable.push({
+        user,
+        healthFactor: hf,
+        totalCollateral: data.totalCollateralBase,
+        totalDebt: data.totalDebtBase,
+      });
+    }
+  }
+  return liquidatable;
+}
+```
+
+### 2. Calculate Profitability
+
+```typescript
+// Fetch reserve config to get liquidation bonus
+const config = await pool.getConfiguration(collateralAsset);
+// Liquidation bonus is in bits 32-47 of the configuration bitmap
+// A value of 10500 means 105% (5% bonus)
+const liquidationBonus = (Number(config) >> 32) & 0xFFFF;
+const bonusPercent = (liquidationBonus - 10000) / 100; // e.g., 5%
+
+// Profit = (collateral received × bonus%) - gas cost
+```
+
+### 3. Execute Liquidation
+
+```typescript
+const signer = await provider.getSigner();
+const pool = new ethers.Contract(POOL_ADDRESS, poolABI, signer);
+
+// Approve debt token spend
+const debtToken = new ethers.Contract(debtAsset, erc20ABI, signer);
+await (await debtToken.approve(POOL_ADDRESS, debtToCover)).wait();
+
+// Execute liquidation
+const tx = await pool.liquidationCall(
+  collateralAsset,
+  debtAsset,
+  borrowerAddress,
+  debtToCover,     // or ethers.MaxUint256 for max
+  false            // receive underlying asset (not hyTokens)
+);
+await tx.wait();
+```
+
+---
+
+## Key Contract Addresses
+
+| Contract              | Address                                      |
+| --------------------- | -------------------------------------------- |
+| Pool                  | `0xceCcE0EB9DD2Ef7996e01e25DD70e461F918A14b` |
+| PoolAddressesProvider | `0xA73ff12D177D8F1Ec938c3ba0e87D33524dD5594` |
+| HyFiOracle            | `0x9BE2ac1ff80950DCeb816842834930887249d9A8` |
+| ProtocolDataProvider  | `0x895C799a5bbdCb63B80bEE5BD94E7b9138D977d6` |
+
+## References
+
+- [Pool API Reference](/developers/smartcontracts/core/pool) — full `liquidationCall` method documentation
+- [HyFiOracle](/developers/smartcontracts/core/hyfioracle) — querying asset prices
+- [HyFiProtocolDataProvider](/developers/smartcontracts/core/hyfiprotocoldataprovider) — querying reserve parameters

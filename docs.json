@@ -1,44 +1,97 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
-  "name": "Mint Starter Kit",
+  "name": "HypurrFi",
   "colors": {
-    "primary": "#16A34A",
-    "light": "#07C983",
-    "dark": "#15803D"
+    "primary": "#4BCAAD",
+    "light": "#A1FCE7",
+    "dark": "#4BCAAD"
+  },
+  "background": {
+    "dark": "#0C0E0F"
   },
   "favicon": "/favicon.svg",
+  "logo": {
+    "dark": "/logo/dark.svg",
+    "light": "/logo/light.svg"
+  },
+  "footer": {
+    "socials": {
+      "x": "https://x.com/hypurrfi",
+      "discord": "https://discord.gg/hypurrfi",
+      "github": "https://github.com/hypurrfi"
+    }
+  },
   "navigation": {
     "tabs": [
       {
-        "tab": "Guides",
+        "tab": "For Humans",
         "groups": [
           {
-            "group": "Getting started",
+            "group": "About",
             "pages": [
               "index",
-              "quickstart",
-              "development"
+              "multiply-your-money/hypurrfi-tldr",
+              "multiply-your-money/team"
             ]
           },
           {
-            "group": "Customization",
+            "group": "Products",
             "pages": [
-              "essentials/settings",
-              "essentials/navigation"
+              "products/hypurrfi-markets",
+              "products/pooled-markets",
+              "products/legacy-markets",
+              "products/earn-vaults",
+              "products/usdxl",
+              "products/card",
+              "products/purrps",
+              "products/points",
+              "products/hyfi",
+              "products/hyperscan",
+              "products/block-size-toggle"
             ]
           },
           {
-            "group": "Writing content",
+            "group": "Risk & Security",
             "pages": [
-              "essentials/markdown",
-              "essentials/code",
-              "essentials/images",
-              "essentials/reusable-snippets"
+              "risk-security/overview",
+              "risk-security/liquidations",
+              "risk-security/audits"
             ]
           },
           {
-            "group": "AI tools",
+            "group": "Education",
+            "pages": [
+              "education/hyperliquid-resources"
+            ]
+          },
+          {
+            "group": "Brand",
+            "pages": [
+              "brand-assets/brand-assets"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "For Agents",
+        "groups": [
+          {
+            "group": "Getting Started",
+            "pages": [
+              "agents/overview"
+            ]
+          },
+          {
+            "group": "Protocol References",
+            "pages": [
+              "agents/hypurrfi-markets",
+              "agents/pooled-markets",
+              "agents/usdxl"
+            ]
+          },
+          {
+            "group": "AI Tools",
             "pages": [
               "ai-tools/cursor",
               "ai-tools/claude-code",
@@ -48,75 +101,50 @@
         ]
       },
       {
-        "tab": "API reference",
+        "tab": "For Developers",
         "groups": [
           {
-            "group": "API documentation",
+            "group": "Getting Started",
             "pages": [
-              "api-reference/introduction"
+              "developers/overview",
+              "developers/addresses"
             ]
           },
           {
-            "group": "Endpoint examples",
+            "group": "Guides",
             "pages": [
-              "api-reference/endpoint/get",
-              "api-reference/endpoint/create",
-              "api-reference/endpoint/delete",
-              "api-reference/endpoint/webhook"
+              "developers/guides/liquidations",
+              "developers/guides/flash-loans",
+              "developers/guides/emode",
+              "developers/guides/legacy-markets"
+            ]
+          },
+          {
+            "group": "Core",
+            "pages": [
+              "developers/smartcontracts/core/pool",
+              "developers/smartcontracts/core/pooladdressesprovider",
+              "developers/smartcontracts/core/pooladdressesproviderregistry",
+              "developers/smartcontracts/core/poolconfigurator",
+              "developers/smartcontracts/core/hyfioracle",
+              "developers/smartcontracts/core/hyfiprotocoldataprovider",
+              "developers/smartcontracts/core/hytoken",
+              "developers/smartcontracts/core/variabledebttoken",
+              "developers/smartcontracts/core/accesscontrolmanager"
+            ]
+          },
+          {
+            "group": "Periphery",
+            "pages": [
+              "developers/smartcontracts/periphery/rewardscontroller",
+              "developers/smartcontracts/periphery/uiincentivedataproviderv3",
+              "developers/smartcontracts/periphery/uipooldataproviderv3",
+              "developers/smartcontracts/periphery/walletbalanceprovider",
+              "developers/smartcontracts/periphery/wrappedtokengatewayv3"
             ]
           }
         ]
       }
-    ],
-    "global": {
-      "anchors": [
-        {
-          "anchor": "Documentation",
-          "href": "https://mintlify.com/docs",
-          "icon": "book-open-cover"
-        },
-        {
-          "anchor": "Blog",
-          "href": "https://mintlify.com/blog",
-          "icon": "newspaper"
-        }
-      ]
-    }
-  },
-  "logo": {
-    "light": "/logo/light.svg",
-    "dark": "/logo/dark.svg"
-  },
-  "navbar": {
-    "links": [
-      {
-        "label": "Support",
-        "href": "mailto:hi@mintlify.com"
-      }
-    ],
-    "primary": {
-      "type": "button",
-      "label": "Dashboard",
-      "href": "https://dashboard.mintlify.com"
-    }
-  },
-  "contextual": {
-    "options": [
-     "copy",
-     "view",
-     "chatgpt",
-     "claude",
-     "perplexity",
-     "mcp",
-     "cursor",
-     "vscode"
-   ]
-  },
-  "footer": {
-    "socials": {
-      "x": "https://x.com/mintlify",
-      "github": "https://github.com/mintlify",
-      "linkedin": "https://linkedin.com/company/mintlify"
-    }
+    ]
   }
 }

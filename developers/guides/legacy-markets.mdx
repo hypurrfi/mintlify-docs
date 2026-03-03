@@ -1,0 +1,61 @@
+---
+title: "Legacy Isolated Markets (Fraxlend)"
+description: "Developer reference for HypurrFi's deprecated Fraxlend-based isolated lending markets"
+---
+
+<Warning>
+  **Deprecated**: Legacy Isolated Markets are being sunset. No incentives are active, and no new borrows are allowed. Only repay and withdraw operations are supported. Markets remain live while assets are deposited.
+</Warning>
+
+## Overview
+
+HypurrFi Legacy Isolated Markets (v1) are single-pair, ring-fenced lending vaults based on Fraxlend's open-source code. Each market supports exactly one collateral asset and one borrow asset, with all risk contained within that pair.
+
+- No cross-market interaction — collateral in one market cannot back borrows in another
+- No shared liquidity pool — each market is fully independent
+- No contract changes from upstream Fraxlend
+
+## Architecture
+
+Each isolated market is an independent vault with:
+
+- **One collateral asset** — deposited by borrowers
+- **One borrow asset** — supplied by lenders, borrowed by depositors
+- **Per-market parameters**: Max LTV, liquidation threshold, variable interest rate
+- **Utilization-based interest rates** — higher utilization → higher borrow rates and supplier yields
+
+### Key Mechanics
+
+- **Deposit**: Add the market's collateral asset to the vault
+- **Lend**: Supply the market's borrow asset to earn yield
+- **Borrow**: Take the borrow asset using supplied collateral as backing
+- **Liquidation**: If a position exceeds risk limits, liquidators repay debt and seize collateral — only within that specific market
+
+## Status
+
+- **No new borrows** are being accepted
+- **No incentives** are active
+- **Repay and withdraw** operations remain functional
+- Markets will remain live as long as assets are deposited
+- An incentive campaign encourages migration to [HypurrFi Markets](/agents/hypurrfi-markets) or [Pooled Markets](/developers/overview#pooled-markets-aave-v302)
+
+## Migration Guidance
+
+Existing integrations should plan migration to one of:
+
+- **HypurrFi Markets** (Euler V2) — for isolated vault use cases with advanced features (EVC batching, sub-accounts, permissionless vault creation)
+- **Pooled Markets** (Aave V3) — for shared-pool lending with combined collateral and E-Mode
+
+No new development against Legacy Isolated Markets is recommended.
+
+## Source Code & Audits
+
+- **Fraxlend Documentation**: [docs.frax.finance](https://docs.frax.finance)
+- **Trail of Bits Security Review** (Nov 2022): [Fraxlend & Fraxferry Review](https://github.com/trailofbits/publications/blob/master/reviews/2022-10-fraxfinance-fraxlend-fraxferry-securityreview.pdf)
+- **Fraxlend Audits**: [docs.frax.com/protocol/security/audit](https://docs.frax.com/protocol/security/audit)
+- **Full audit list**: [HypurrFi Audits page](/risk-security/audits)
+
+## References
+
+- [Legacy Isolated Markets (For Humans)](/products/legacy-markets) — user-facing documentation
+- [Developer Overview](/developers/overview) — HypurrFi's three lending systems

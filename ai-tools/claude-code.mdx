@@ -4,7 +4,7 @@ description: "Configure Claude Code for your documentation workflow"
 icon: "asterisk"
 ---
 
-Set up Claude Code to help you write and maintain your Mintlify documentation.
+Set up Claude Code to work with HypurrFi documentation and integration code.
 
 ## Prerequisites
 
@@ -19,25 +19,15 @@ Set up Claude Code to help you write and maintain your Mintlify documentation.
   ```
 </Step>
 
-<Step title="Install the Mintlify skill">
-  In your docs directory, run:
-
-  ```bash
-  npx skills add https://mintlify.com/docs
-  ```
-
-  This gives Claude Code Mintlify's component reference, writing standards,
-  and workflow guidance.
+<Step title="Load the HypurrFi skill file">
+  Claude Code automatically reads `AGENTS.md` and `SKILL.md` from the repo root. `SKILL.md` contains the full HypurrFi protocol reference including product taxonomy, contract addresses, code patterns, and user interaction guidelines.
 </Step>
 
-<Step title="Customize project instructions">
-  Edit `AGENTS.md` in your project root to add project-specific terminology,
-  style preferences, and content boundaries.
-</Step>
-
-<Step title="Start writing with Claude Code">
+<Step title="Start working">
   ```bash
   claude
   ```
+
+  Claude Code will have full HypurrFi context for documentation edits or integration code.
 </Step>
 </Steps>

@@ -1,0 +1,134 @@
+---
+title: "Developer Overview"
+description: "Getting started with HypurrFi development on HyperEVM"
+---
+
+## HypurrFi Lending Systems
+
+HypurrFi operates three independent lending systems on HyperEVM. Each is a fork of a battle-tested protocol with no core contract changes — only deployment configuration, risk parameters, and asset listings differ.
+
+### Pooled Markets (Aave V3.0.2)
+
+Shared-pool lending model. Users deposit multiple assets as combined collateral and borrow from a shared liquidity pool. Borrow power is calculated across the full deposited portfolio.
+
+- **Codebase**: [Aave V3.0.2](https://github.com/aave/aave-v3-core) — no contract changes
+- **Entry point**: `Pool` contract at `0xceCcE0EB9DD2Ef7996e01e25DD70e461F918A14b`
+- **Features**: E-Mode (efficiency mode), flash loans, variable rate borrowing
+- **Key differences from upstream Aave V3**:
+  - Stable debt is **not supported**
+  - RewardsController is **not currently available**
+  - Reserve assets configured for HyperEVM ecosystem
+- **Contract references**: [Pooled Markets Addresses](/developers/addresses), [Pool API](/developers/smartcontracts/core/pool)
+
+### HypurrFi Markets / Mewler (Euler V2)
+
+Isolated vault lending model. Each vault is an independent market for a single ERC-20 token with its own parameters. Permissionless vault creation via the Euler Vault Kit (EVK). Advanced features via the Ethereum Vault Connector (EVC): atomic batching, sub-accounts, operator delegation.
+
+- **Codebase**: [Euler Vault Kit](https://github.com/euler-xyz/euler-vault-kit) — no contract changes
+- **Entry point**: `eVaultFactory` at `0xcF5552580fD364cdBBFcB5Ae345f75674c59273A`
+- **Features**: ERC-4626 vaults, EVC batching, sub-accounts (up to 256 per wallet), permissionless vault deployment
+- **Contract references**: [Mewler Addresses](/developers/addresses#mewler-hypurrfi-markets-euler-v2), [HypurrFi Markets Agent Reference](/agents/hypurrfi-markets)
+
+### Legacy Isolated Markets (Fraxlend) — Deprecated
+
+Single-pair, ring-fenced lending vaults. Each market has one collateral asset and one borrow asset with zero cross-market exposure.
+
+<Warning>
+  **Deprecated**: No incentives, no new borrows allowed. Only repay and withdraw operations are supported. Markets remain live while assets are deposited. Plan migration to Pooled Markets or HypurrFi Markets.
+</Warning>
+
+- **Codebase**: [Fraxlend](https://docs.frax.finance) — no contract changes
+- **Reference**: [Legacy Markets Guide](/developers/guides/legacy-markets)
+
+---
+
+## Network Information
+
+- **Network**: HyperEVM Mainnet
+- **Block Explorers**: [hyperscan.com](https://hyperscan.com), [hyperevmscan.io](https://hyperevmscan.io)
+- **Native Token**: HYPE (use `MOCK_HYPE_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE` for balance queries)
+- **Wrapped Native**: WHYPE (query via `WrappedTokenGatewayV3.getWHYPEAddress()`)
+
+---
+
+## Package Requirements
+
+```bash
+# JavaScript / TypeScript
+npm install ethers
+# or
+npm install viem
+
+# Solidity (Foundry) — for Mewler/Euler V2
+forge install euler-xyz/euler-interfaces
+
+# Solidity (Hardhat) — for Mewler/Euler V2
+npm install @euler-xyz/euler-interfaces
+```
+
+### ABI Sources
+
+- **Pooled Markets (Aave V3)**: ABIs are embedded in the contract reference pages ([Pool](/developers/smartcontracts/core/pool), [PoolConfigurator](/developers/smartcontracts/core/poolconfigurator), etc.) or fetch from verified contracts on [hyperscan.com](https://hyperscan.com)
+- **Mewler (Euler V2)**: [euler-interfaces](https://github.com/euler-xyz/euler-interfaces) repository
+
+---
+
+## Oracles
+
+HypurrFi uses third-party oracles for price feeds:
+
+- **Pyth Network** — primary price feeds ([audit reports](https://github.com/pyth-network/audit-reports))
+- **Redstone** — additional price feed redundancy ([audits](https://docs.redstone.finance/docs/security/audits/))
+- **Hyperliquid validator feeds** — for select assets
+
+### Querying Prices (Pooled Markets)
+
+```solidity
+// HyFiOracle: 0x9BE2ac1ff80950DCeb816842834930887249d9A8
+IHyFiOracle oracle = IHyFiOracle(0x9BE2ac1ff80950DCeb816842834930887249d9A8);
+
+// Single asset price (in BASE_CURRENCY wei)
+uint256 price = oracle.getAssetPrice(assetAddress);
+
+// Multiple asset prices
+uint256[] memory prices = oracle.getAssetsPrices(assetAddresses);
+
+// Check price source for an asset
+address source = oracle.getSourceOfAsset(assetAddress);
+```
+
+---
+
+## Source Repositories
+
+- **HypurrFi Deployments**: [github.com/alphak3y/hypurrfi-deployments](https://github.com/alphak3y/hypurrfi-deployments) — deployment configs and audit reports
+- **Euler Interfaces**: [github.com/euler-xyz/euler-interfaces](https://github.com/euler-xyz/euler-interfaces) — ABIs and addresses for Mewler
+- **Euler Vault Kit**: [github.com/euler-xyz/euler-vault-kit](https://github.com/euler-xyz/euler-vault-kit) — core vault contracts
+- **Aave V3 Core**: [github.com/aave/aave-v3-core](https://github.com/aave/aave-v3-core) — Pooled Markets base code
+- **Fraxlend**: [docs.frax.finance](https://docs.frax.finance) — Legacy Isolated Markets base code
+
+---
+
+## Risk & Security
+
+HypurrFi partners with **[Clearstar Labs](https://www.clearstar.xyz/)** for on-chain risk curation and continuous monitoring.
+
+- [HypurrFi Deployment Audit](https://github.com/lastdotnet/hypurrfi-deployments/blob/master/audits/HypurrFi-security-review_2025-02-12.pdf)
+- [HypurrFi Risk & Analytics Dashboard](https://dune.com/ktabes/hypurrfi-the-hypurrhub-of-finance)
+- Full audit list: [Audits page](/risk-security/audits)
+
+---
+
+## Next Steps
+
+- **[Contract Addresses](/developers/addresses)** — all deployed contract addresses for Pooled Markets and Mewler
+- **[Liquidation Guide](/developers/guides/liquidations)** — build liquidation bots for Pooled Markets
+- **[Flash Loan Guide](/developers/guides/flash-loans)** — use flash loans for arbitrage or refinancing
+- **[E-Mode Guide](/developers/guides/emode)** — boost capital efficiency with Efficiency Mode
+- **[Legacy Markets](/developers/guides/legacy-markets)** — reference for deprecated Fraxlend markets
+- **[HypurrFi Markets Agent Reference](/agents/hypurrfi-markets)** — full Euler V2 integration guide
+
+## Support
+
+- Telegram: [HypurrFi Community](https://t.me/+YvsBvSxlQrVhNDkx)
+- Discord: [Support Ticket](https://discord.com/invite/CvJPEJjBNn)

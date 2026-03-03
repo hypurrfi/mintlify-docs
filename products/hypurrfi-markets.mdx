@@ -1,57 +1,101 @@
-# Introduction
+---
+title: "HypurrFi Markets"
+description: "HypurrFi Prime and HypurrFi Yield — modular lending markets on Hyperliquid"
+---
 
-Euler Markets on Hyperliquid
+## What Are HypurrFi Markets?
 
-## Project Mewler
+HypurrFi Markets (also known as **Mewler** in the community) are the Hyperliquid EVM implementation of Euler's modular lending architecture, delivered through our partnership with Euler Finance. No contract changes from the Euler stack — HypurrFi's risk management and curator partners handle asset listing, market configuration, and deployment.
 
-<Note>
-  The pun of "Project Mewler" is an unofficial name for the partnership. HypurrFi has a cat-theme from intitial launch, and Euler (pronounced Oiler) has long been mistakenly pronounced as Yoo-ler. Mew-ler is a fun reference to both. Season Mew.
-</Note>
+- **HypurrFi Prime** — isolated lending markets with one risk profile and asset range
+- **HypurrFi Yield** — isolated lending markets with a different risk profile and asset range
 
-HypurrFi Markets are the Hyperliquid EVM implementation of Euler's modular lending architecture delivered through our partnership with Euler Finance.
+Both Prime and Yield are isolated lending markets that work the same way — same Euler V2 technology, just configured with different risk parameters and asset pairs. **Earn Vaults** are a separate product where curators route your deposits into Prime or Yield markets to generate yield (see [Earn Vaults](/products/earn-vaults)).
 
-There are no contract changes from the Euler stack. The only difference in implementation is that HypurrFi's risk management and curator partners are responsible for asset listing, market cponfiguration, and deployment.
+HypurrFi Markets define collateral and borrowing relationships between asset pairs. When markets are linked, parameters determine capital efficiency (LTV), risk isolation, and available borrowing routes.
 
-HypurrFi will modify the front-end experience of the Euler Market stack to connect to existing and future HypurrFi and Hyperliquid feature sets.
+HypurrFi partners with [Clearstar Labs](https://www.clearstar.xyz/) for independent risk curation and market parameter oversight.
 
-HypurrFi Markets define collateral and borrowing relationships between various asset pairs, and are the building block for HypurrFi Earn Vaults where curators deploy user-deposited capital into markets for strategies that lend, borrow, provide liquidity, trade, or conduct other activities that generate returns paid out to Earn depositors.
+---
 
-When HypurrFi Markets are linked, the parameters determine capital efficiency (LTV), risk isolation, and available borrowing routes.
+## How to Borrow (HypurrFi Prime)
 
-HypurrFi partners with Objective Labs on consultation for HypurrFi Markets parameters.
+### 1. Choose Your Collateral
 
-With the underlying Euler Vault Kit (EVK) and Ethereum Vault Connector (EVC), developers can build everything from simple isolated lending pairs to advanced multi-collateral, cross-collateralised clusters.
+Browse the available markets and select the asset you want to use as collateral (e.g., HYPE, wstHYPE, ETH). Each market shows the collateral assets accepted and the terms (LTV, liquidation threshold).
 
-Anyone can create HypurrFi Markets and Earn Vaults, however HypurrFi allows only select markets to be featured on the front-end application.
+### 2. Select a Market
+
+Choose which market to deposit into. Markets are asset pairs — your collateral asset paired with a borrow asset. Look at:
+
+- **LTV** — how much you can borrow relative to your collateral
+- **Liquidation LTV** — the threshold where your position becomes at risk
+- **Borrow APY** — the interest rate you'll pay
+- **Available liquidity** — how much is available to borrow
+
+### 3. Deposit Collateral
+
+1. Click into your chosen market
+2. Enter the amount of collateral to deposit
+3. Approve the token if this is your first time
+4. Confirm the deposit transaction
+
+### 4. Borrow
+
+1. Use the **Borrow** tool to select which asset you want to borrow
+2. Enter the amount — stay well within your LTV limit to maintain a healthy position
+3. Review your health score and liquidation price
+4. Confirm the borrow transaction
+
+The borrowed amount is sent to your wallet. Interest accrues on your debt continuously.
+
+### 5. Monitor & Manage
+
+- **Health score > 1.0** means your position is safe
+- **Health score approaching 1.0** means you should add collateral or repay debt
+- **Health score < 1.0** means your position can be [liquidated](/risk-security/liquidations)
+
+To close your position: repay your debt, then withdraw your collateral.
+
+---
+
+## How to Earn
+
+There are two ways to earn yield on HypurrFi Markets:
+
+### Option 1: Earn Vaults (Curated Strategies)
+
+Deposit into Earn Vaults where professional curators route your funds into Prime or Yield markets based on yield and risk tolerance. See the [Earn Vaults](/products/earn-vaults) page for details.
+
+### Option 2: Lend Directly to Markets
+
+Supply assets directly to Prime or Yield lending markets to earn interest from borrowers:
+
+1. Browse available markets and find one where your asset is the **borrow asset**
+2. Click into the market and select **Lend**
+3. Enter the amount to supply
+4. Confirm the transaction
+
+You earn the supply APY as borrowers pay interest. You can withdraw at any time, subject to available liquidity in the market.
+
+---
 
 ## Assets
 
-HypurrFi Markets launch with large liquidity assets on Hyperliquid EVM in partnership with Clearstar. Additional pairs and assets will be listed as liquidity and demand for trading grows, with special attention to assets and pairs in the Legacy Isolated Markets product and new assets looking to bootstrap liquidity on Hyperliquid.
+HypurrFi Markets launch with large liquidity assets on Hyperliquid EVM. Additional pairs and assets are listed as liquidity and demand grows. Reach out to the HypurrFi team in official channels to inquire about listing a new market.
 
-Please reach out to the HypurrFi team in official channels to inquire about listing a new market.
+## Market Designs
 
-## Common Market Designs
+HypurrFi Markets are modular and composable. Common configurations include:
 
-The benefit of Euler Markets is their modularity and composability with a massive variety of asset configurations. This enables highly customized markets for sophisticated trading and yield strategies with dramatic increases in capital efficiency.
-
-Below are examples of possible market designs. Please refer to the comprehensive Euler Finance documentation and whitepaper for a full write-up of the power of modular market design.
-
-### Simple collateral–debt pairs
-
-The simplest HypurrFi Market consists of two assets: one lending asset and one collateral asset. This structure mirrors Isolated Markets and keeps risk locked within the pair, but is less capital-efficient and fragments liquidity.
-
-### Collateral–debt pairs with rehypothecation
-
-A more advanced version allows assets to use each other as collateral. Collateral assets can be used to borrow a lending asset, and the lending assets can also be collateral to borrow from the other paired asset. This increases capital efficiency because collateral generates yield while backing loans.
-
-This structure is similar to the Pooled Markets model with a different set of assets that may not fit into the Pooled Market risk requirements, for example LHYPE is a looped derivative of HYPE, wstHYPE, kHYPE, and beHYPE. It is highly risky to put the derivative asset itself into the pool with its reference assets. However, LHYPE could be paired with a wide variety of stablecoins or other uncorrelated assets in a smaller pooled model and still access the HypurrFi Market liquidity.
-
-### Fully customisable markets
-
-HypurrFi Markets allow developers to combine vaults in any configuration. Builders can use vaults from existing markets, add new vaults, create custom collateral routes, or implement bespoke hooks and logic. This flexibility supports experimentation and market structures tailored to specific risk, liquidity, or strategy needs.
-
-In the Euler stack, the EVK (Euler Vault Kit) is the core building block for HypurrFi Markets. EVK vaults are extended ERC-4626 vaults that act as passive lending pools. They accept ERC-20 token deposits, support borrowing against supplied collateral, and serve as the core components used to construct custom HypurrFi Markets.
+- **Simple collateral–debt pairs** — one collateral asset, one borrow asset. Risk stays locked within the pair.
+- **Rehypothecation pairs** — assets can serve as both collateral and borrow targets, increasing capital efficiency.
+- **Custom multi-vault clusters** — multiple vaults linked together for sophisticated strategies.
 
 ## Creating a Market
 
-Market creators can deploy HypurrFi Markets through the Creator Tools suite. This includes configuring vault parameters, connecting vaults using the EVC, defining collateral behavior, adding advanced logic, and setting risk controls. The EVK + EVC architecture enables developers to construct isolated markets, multi-asset systems, or entirely novel lending structures within the HypurrFi ecosystem. For a detailed builder write-up, please refer to the Euler Repository: [Euler Vault Kit](https://github.com/euler-xyz/euler-vault-kit)
+Anyone can create HypurrFi Markets and Earn Vaults, however only select markets are featured on the HypurrFi front-end.
+
+<Note>
+  **For developers**: See the [Developer Overview](/developers/overview) for setup instructions and the [HypurrFi Markets Agent Reference](/agents/hypurrfi-markets) for contract addresses, vault creation, and integration examples.
+</Note>

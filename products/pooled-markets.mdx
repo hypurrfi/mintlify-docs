@@ -1,18 +1,49 @@
-# Pooled Markets
-
-HypurrFi pooled markets enable lending, borrowing, and leveraged positions
+---
+title: "Pooled Markets"
+description: "HypurrFi pooled markets enable lending, borrowing, and leveraged positions"
+---
 
 HypurrFi Pooled Markets use Aave V3's battle-tested, open source lending contracts to enable a familiar and simple lend and borrow product to earn, manage carry trades (aka looping), and take long or short positions with spot assets.
 
 Pooled Markets let users deposit multiple assets as combined collateral and borrow from a shared liquidity pool. Borrow power is calculated across your whole deposited portfolio rather than per-asset value.
 
+---
+
+## How to Supply
+
+1. Go to [Pooled Markets](https://app.hypurr.fi/markets/pooled) and choose the asset you want to supply
+2. Click into the asset and select **Supply**
+3. Enter the amount you want to deposit
+4. Approve the token if this is your first time
+5. Confirm the transaction
+
+Your supplied assets earn interest from borrowers automatically. You can also toggle whether your deposit counts as **collateral** for borrowing.
+
+## How to Borrow
+
+1. Supply collateral first (see above)
+2. Make sure collateral is enabled for your supplied assets
+3. Select the asset you want to borrow
+4. Click **Borrow** and enter the amount — keep your Health Factor well above 1.0
+5. Review your updated Health Factor and confirm the transaction
+
+Borrowed assets are sent to your wallet. Interest accrues on your debt continuously.
+
+## How to Repay
+
+1. Go to the asset you borrowed and click **Repay**
+2. Enter the amount to repay (partial or full)
+3. Confirm the transaction
+
+Repaying reduces your debt and improves your Health Factor. To fully close a position, repay all debt then withdraw your collateral.
+
+---
+
 ## Assets
 
-Assets are added to HypurrFi Pooled Markets according to a risk framework developed by Objective Labs, HypurrFi's independent consultant on asset quality and liquidity.
+Assets are added according to a risk framework developed by [Clearstar Labs](https://www.clearstar.xyz/), HypurrFi's independent risk curator. See the [HypurrFi Risk & Analytics Dashboard](https://dune.com/ktabes/hypurrfi-the-hypurrhub-of-finance) for live market data.
 
-Assets for pooled lending, collateralization, and borrowing can be found at [https://app.hypurr.fi/markets/pooled](https://app.hypurr.fi/markets/pooled)
-
-Click into each asset in the app to see specific parameters for deposit caps, collateralization ratios, LTV, current and historical interest rates, and more.
+Browse available assets at [app.hypurr.fi/markets/pooled](https://app.hypurr.fi/markets/pooled). Click into each asset to see deposit caps, collateralization ratios, LTV, interest rates, and more.
 
 ## Glossary
 

@@ -1,0 +1,127 @@
+---
+title: "Efficiency Mode (E-Mode)"
+description: "How to use E-Mode for boosted capital efficiency in HypurrFi Pooled Markets"
+---
+
+## Overview
+
+Efficiency Mode (E-Mode) allows borrowers to get higher LTV when both collateral and debt assets belong to the same correlated category (e.g., USD-correlated stablecoins, HYPE-correlated assets).
+
+When E-Mode is enabled for a category, the category's LTV and liquidation parameters override the per-asset defaults — typically resulting in significantly higher borrowing power.
+
+**Trade-off**: While in an E-Mode category, you can only borrow assets that belong to that same category.
+
+---
+
+## How It Works
+
+Each E-Mode category defines:
+
+| Parameter              | Description                                    |
+| ---------------------- | ---------------------------------------------- |
+| LTV                    | Maximum loan-to-value (higher than default)    |
+| Liquidation Threshold  | Threshold for liquidation (higher than default)|
+| Liquidation Bonus      | Bonus for liquidators                          |
+| Oracle                 | Optional custom oracle for the category        |
+| Label                  | Human-readable name (e.g., "USD-correlated")   |
+
+Category `0` is the default (non-E-Mode) — standard per-asset parameters apply.
+
+---
+
+## Contract Methods
+
+### Set E-Mode
+
+```solidity
+// Pool contract
+function setUserEMode(uint8 categoryId) external
+```
+
+Activates E-Mode for `msg.sender`. Pass `0` to disable E-Mode.
+
+<Note>
+  Will revert if the user is borrowing an asset not in the target category, or if the change would drop the health factor below the liquidation threshold.
+</Note>
+
+### Query User's E-Mode
+
+```solidity
+function getUserEMode(address user) external view returns (uint256)
+```
+
+Returns the E-Mode category ID for the user. `0` means E-Mode is not active.
+
+### Query Category Data
+
+```solidity
+function getEModeCategoryData(uint8 id) external view returns (
+    uint16 ltv,
+    uint16 liquidationThreshold,
+    uint16 liquidationBonus,
+    address priceSource,
+    string memory label
+)
+```
+
+---
+
+## TypeScript Examples
+
+### Enable E-Mode
+
+```typescript
+const pool = new ethers.Contract(POOL_ADDRESS, poolABI, signer);
+
+// Enable USD-correlated E-Mode (example category ID = 1)
+await (await pool.setUserEMode(1)).wait();
+
+// Disable E-Mode
+await (await pool.setUserEMode(0)).wait();
+```
+
+### Query E-Mode Status
+
+```typescript
+const pool = new ethers.Contract(POOL_ADDRESS, poolABI, provider);
+
+// Check user's active E-Mode
+const categoryId = await pool.getUserEMode(userAddress);
+console.log(`User E-Mode category: ${categoryId}`);
+
+// Get category parameters
+if (categoryId > 0) {
+  const data = await pool.getEModeCategoryData(categoryId);
+  console.log(`LTV: ${data.ltv / 100}%`);
+  console.log(`Liquidation Threshold: ${data.liquidationThreshold / 100}%`);
+  console.log(`Label: ${data.label}`);
+}
+```
+
+---
+
+## Example Categories
+
+Categories are configured by Risk Admins or Pool Admins. Typical categories on HypurrFi include:
+
+- **USD-correlated**: Stablecoins (USDT0, USDC, USDXL) — higher LTV since assets are tightly correlated
+- **HYPE-correlated**: HYPE and liquid staking derivatives (wstHYPE, kHYPE, beHYPE) — higher LTV for correlated HYPE assets
+
+Query available categories by calling `getEModeCategoryData` for IDs 1–255 and checking for non-zero values.
+
+---
+
+## Important Constraints
+
+- You can only borrow assets within your active E-Mode category
+- Switching categories will revert if you have outstanding borrows in a different category
+- Disabling E-Mode (setting to 0) will revert if it would drop your health factor below the liquidation threshold
+- E-Mode categories are defined by governance — not user-configurable
+
+---
+
+## References
+
+- [Pool API Reference](/developers/smartcontracts/core/pool) — `setUserEMode`, `getUserEMode`, `getEModeCategoryData`
+- [PoolConfigurator](/developers/smartcontracts/core/poolconfigurator) — `setEModeCategory`, `setAssetEModeCategory` (admin methods)
+- [Pooled Markets](/products/pooled-markets) — user-facing E-Mode documentation

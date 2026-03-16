@@ -4,7 +4,7 @@ description: "Configure Cursor for your documentation workflow"
 icon: "arrow-pointer"
 ---
 
-Set up Cursor to help you write and maintain your Mintlify documentation.
+Set up Cursor to work with HypurrFi documentation and integration code.
 
 ## Prerequisites
 
@@ -13,27 +13,19 @@ Set up Cursor to help you write and maintain your Mintlify documentation.
 ## Setup
 
 <Steps>
-<Step title="Open your docs directory in Cursor">
-  Open the root of your documentation repository where `docs.json` is located.
+<Step title="Open the docs directory in Cursor">
+  Open the root of the documentation repository where `docs.json` is located.
 </Step>
 
-<Step title="Install the Mintlify skill">
-  In the integrated terminal, run:
-
-  ```bash
-  npx skills add https://mintlify.com/docs
-  ```
-
-  This gives Cursor Mintlify's component reference, writing standards,
-  and workflow guidance.
+<Step title="Load the HypurrFi skill file">
+  Add `SKILL.md` from the repo root to your Cursor context. This gives your agent the full HypurrFi protocol reference including product taxonomy, contract addresses, code patterns, and user interaction guidelines.
 </Step>
 
-<Step title="Customize project instructions">
-  Edit `AGENTS.md` in your project root to add project-specific terminology,
-  style preferences, and content boundaries.
+<Step title="Review project instructions">
+  `AGENTS.md` in the project root contains HypurrFi-specific terminology, style rules, and content structure. Cursor will read this automatically.
 </Step>
 
-<Step title="Start writing with Cursor">
-  Open a file and use Cursor's AI features to draft and edit documentation.
+<Step title="Start writing">
+  Open a file and use Cursor's AI features to draft and edit documentation or integration code.
 </Step>
 </Steps>

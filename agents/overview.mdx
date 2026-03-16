@@ -1,0 +1,134 @@
+---
+title: "HypurrFi Protocol Overview"
+description: "Agent-readable overview of HypurrFi's product suite, network, and key references on HyperEVM."
+---
+
+<Card title="HypurrFi SKILL.md" icon="github" href="https://github.com/hypurrfi/mintlify-docs/blob/main/SKILL.md">
+  Full protocol skill file for AI agents — product taxonomy, contract addresses, code patterns, compliance rules, and user interaction guidelines
+</Card>
+
+Plaintext: [https://raw.githubusercontent.com/hypurrfi/mintlify-docs/main/SKILL.md](https://raw.githubusercontent.com/hypurrfi/mintlify-docs/main/SKILL.md)
+
+## HypurrFi Product Suite
+
+HypurrFi builds lending, credit, and infrastructure products on Hyperliquid EVM (HyperEVM). All lending codebases are forks of battle-tested protocols with no core contract changes — only deployment configuration, risk parameters, and asset listings differ.
+
+### Lending / DeFi Products
+
+- **HypurrFi Markets** (Euler V2 / community name: Mewler) — umbrella for the Euler-based isolated lending stack:
+  - **HypurrFi Prime** — isolated lending markets with one risk profile / asset range
+  - **HypurrFi Yield** — isolated lending markets with a different risk profile / asset range
+  - Both work identically (same Euler V2 vault technology), just configured with different risk parameters and asset pairs
+- **Earn Vaults** (Euler Earn) — curated, managed lending strategies. Users deposit and a curator routes funds to Prime or Yield markets based on yield and risk tolerance. **Not the same as "vaults" in Euler terminology** (where every lending market is called a vault).
+- **Pooled Markets** (Aave V3.0.2) — shared-pool lending with combined collateral. Users deposit multiple assets as combined collateral and borrow from a shared liquidity pool.
+- **Legacy Isolated Markets** (Fraxlend) — **deprecated**. No incentives, no new borrows. Only repay and withdraw. Markets remain live while assets are deposited.
+- **USDXL** — Hyperliquid-native CDP-hybrid synthetic dollar. Backed by debt positions in Pooled Markets plus a USDT0 reserve in a hybrid model. Mintable as a CDP from Pooled Markets or directly with USDT0. **USDXL is not a stablecoin.**
+
+### Other Products
+
+- **Swype Credit Card** (swype.fun) — spend against on-chain lending positions without selling assets
+- **Purrps** (alpha) — HypurrFi DEX using Hyperliquid builder codes with integrated lending and spend
+- **Listing Service** — asset listing service for HypurrFi markets
+- **HyperScan.com** — Hyperliquid EVM blockchain explorer, maintained by HypurrFi as a public good
+
+---
+
+## Network Information
+
+- **Network**: HyperEVM Mainnet
+- **Block Explorers**: [hyperscan.com](https://hyperscan.com), [hyperevmscan.io](https://hyperevmscan.io)
+- **Native Token**: HYPE (`0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE` for balance queries)
+- **Wrapped Native**: WHYPE (query via `WrappedTokenGatewayV3.getWHYPEAddress()`)
+
+---
+
+## When to Use Each Product
+
+| Use Case | Product |
+| --- | --- |
+| Shared-pool lending, combined collateral, E-Mode, flash loans | **Pooled Markets** |
+| Isolated lending, EVC batching, sub-accounts, permissionless vaults | **HypurrFi Prime** or **Yield** |
+| Passive yield via curated strategy | **Earn Vaults** |
+| Mint USDXL (CDP-hybrid synthetic dollar) | Borrow from **Pooled Markets** or convert from USDT0 |
+| Migrate from deprecated v1 markets | **Legacy Markets** → repay and withdraw, re-deposit into Prime/Yield or Pooled |
+
+---
+
+## Package Requirements
+
+```bash
+# JavaScript / TypeScript
+npm install ethers
+# or
+npm install viem
+
+# Solidity (Foundry) — for HypurrFi Markets (Euler V2)
+forge install euler-xyz/euler-interfaces
+
+# Solidity (Hardhat) — for HypurrFi Markets (Euler V2)
+npm install @euler-xyz/euler-interfaces
+```
+
+### ABI Sources
+
+- **Pooled Markets (Aave V3)**: fetch from verified contracts on [hyperscan.com](https://hyperscan.com) or see [Pool API](/developers/smartcontracts/core/pool)
+- **HypurrFi Markets (Euler V2)**: [euler-interfaces](https://github.com/euler-xyz/euler-interfaces) repository
+
+---
+
+## Oracles
+
+HypurrFi uses third-party oracles for price feeds:
+
+- **Pyth Network** — primary price feeds
+- **Redstone** — additional redundancy
+- **Hyperliquid validator feeds** — for select assets
+
+### Querying Prices (Pooled Markets)
+
+```typescript
+const ORACLE_ADDRESS = "0x9BE2ac1ff80950DCeb816842834930887249d9A8";
+const oracleABI = [
+  "function getAssetPrice(address asset) external view returns (uint256)",
+  "function getAssetsPrices(address[] calldata assets) external view returns (uint256[] memory)",
+  "function getSourceOfAsset(address asset) external view returns (address)",
+];
+const oracle = new ethers.Contract(ORACLE_ADDRESS, oracleABI, provider);
+
+// Single asset price (in BASE_CURRENCY wei)
+const price = await oracle.getAssetPrice(assetAddress);
+
+// Multiple asset prices
+const prices = await oracle.getAssetsPrices([asset1, asset2]);
+```
+
+---
+
+## Common Token Addresses (HyperEVM)
+
+- **HYPE** (native): `0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE`
+- **WHYPE** (wrapped): query via WrappedTokenGatewayV3
+- **USDT0**: check Pooled Markets reserve list
+- **USDC**: check Pooled Markets reserve list
+- **USDXL**: check Pooled Markets reserve list
+- **wstHYPE**, **kHYPE**, **beHYPE**: check Pooled Markets reserve list or E-Mode categories
+
+Query all reserve tokens:
+
+```typescript
+const pool = new ethers.Contract(POOL_ADDRESS, poolABI, provider);
+const reserves = await pool.getReservesList();
+```
+
+---
+
+## Agent Reference Pages
+
+- [**Pooled Markets Agent Reference**](/agents/pooled-markets) — Aave V3 integration: supply, borrow, repay, withdraw, E-Mode, flash loans, liquidation
+- [**HypurrFi Markets Agent Reference**](/agents/hypurrfi-markets) — Euler V2 integration: vaults, EVC batching, sub-accounts, Earn Vaults, vault creation, liquidation
+- [**USDXL Agent Reference**](/agents/usdxl) — CDP-hybrid synthetic dollar: minting, repaying, use cases
+
+## Support
+
+- Telegram: [HypurrFi Community](https://t.me/+YvsBvSxlQrVhNDkx)
+- Discord: [Support Ticket](https://discord.com/invite/CvJPEJjBNn)

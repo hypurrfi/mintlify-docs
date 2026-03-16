@@ -1,0 +1,188 @@
+---
+title: "Flash Loan Guide"
+description: "How to use flash loans on HypurrFi Pooled Markets"
+---
+
+## Overview
+
+Flash loans let you borrow any amount of available liquidity from the Pool in a single transaction, as long as the borrowed amount (plus fee) is returned — or a debt position is opened — by the end of the transaction. No collateral is required.
+
+HypurrFi Pooled Markets support two flash loan variants:
+
+| Method           | Assets       | Can open debt | Fee waiver for FLASH_BORROWER |
+| ---------------- | ------------ | ------------- | ----------------------------- |
+| `flashLoan`      | Multi-asset  | Yes           | Yes                           |
+| `flashLoanSimple`| Single asset | No            | No                            |
+
+---
+
+## Fee Structure
+
+Query the current flash loan premiums from the Pool contract:
+
+```typescript
+const pool = new ethers.Contract(POOL_ADDRESS, poolABI, provider);
+
+// Total premium paid by borrower (in basis points, e.g., 5 = 0.05%)
+const totalPremium = await pool.FLASHLOAN_PREMIUM_TOTAL();
+
+// Portion of premium accrued to protocol treasury
+const protocolPremium = await pool.FLASHLOAN_PREMIUM_TO_PROTOCOL();
+```
+
+The remainder (`totalPremium - protocolPremium`) is distributed to liquidity providers.
+
+<Note>
+  Flash loan fees are waived for addresses with the `FLASH_BORROWER` role (applies to `flashLoan` only, not `flashLoanSimple`). This role is granted via governance.
+</Note>
+
+---
+
+## IFlashLoanReceiver Interface
+
+Your receiver contract must implement:
+
+```solidity
+interface IFlashLoanReceiver {
+    function executeOperation(
+        address[] calldata assets,
+        uint256[] calldata amounts,
+        uint256[] calldata premiums,
+        address initiator,
+        bytes calldata params
+    ) external returns (bool);
+}
+```
+
+| Parameter | Description                                              |
+| --------- | -------------------------------------------------------- |
+| assets    | Addresses of the borrowed assets                         |
+| amounts   | Amounts of each asset borrowed                           |
+| premiums  | Fee amounts due for each asset                           |
+| initiator | Address that initiated the flash loan                    |
+| params    | Arbitrary bytes passed from the original `flashLoan` call|
+
+Your `executeOperation` must:
+1. Execute your logic (arbitrage, refinancing, etc.)
+2. Approve the Pool to pull back `amounts[i] + premiums[i]` for each asset
+3. Return `true`
+
+---
+
+## flashLoan (Multi-Asset)
+
+```solidity
+function flashLoan(
+    address receiverAddress,
+    address[] calldata assets,
+    uint256[] calldata amounts,
+    uint256[] calldata modes,        // 0=no debt, 1=stable(N/A), 2=variable
+    address onBehalfOf,
+    bytes calldata params,
+    uint16 referralCode              // use 0
+) external
+```
+
+The `modes` array determines what happens if you don't repay:
+- `0` — no debt position; you must repay amount + fee or the tx reverts
+- `2` — open a variable-rate debt position on `onBehalfOf` (who must have collateral and have delegated credit to `msg.sender`)
+
+<Note>
+  Mode `1` (stable debt) is **not supported** on HypurrFi.
+</Note>
+
+---
+
+## flashLoanSimple (Single Asset)
+
+```solidity
+function flashLoanSimple(
+    address receiverAddress,
+    address asset,
+    uint256 amount,
+    bytes calldata params,
+    uint16 referralCode              // use 0
+) external
+```
+
+Simpler variant: single asset, no debt opening, no fee waiver.
+
+---
+
+## Solidity Example
+
+```solidity
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+import {IPool} from "@aave/v3-core/contracts/interfaces/IPool.sol";
+import {IFlashLoanReceiver} from "@aave/v3-core/contracts/flashloan/base/FlashLoanReceiverBase.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+
+contract MyFlashLoan is IFlashLoanReceiver {
+    IPool public constant POOL = IPool(0xceCcE0EB9DD2Ef7996e01e25DD70e461F918A14b);
+
+    function executeFlashLoan(address asset, uint256 amount) external {
+        address[] memory assets = new address[](1);
+        assets[0] = asset;
+        uint256[] memory amounts = new uint256[](1);
+        amounts[0] = amount;
+        uint256[] memory modes = new uint256[](1);
+        modes[0] = 0; // no debt
+
+        POOL.flashLoan(
+            address(this),
+            assets,
+            amounts,
+            modes,
+            address(this),
+            "",    // params
+            0      // referralCode
+        );
+    }
+
+    function executeOperation(
+        address[] calldata assets,
+        uint256[] calldata amounts,
+        uint256[] calldata premiums,
+        address initiator,
+        bytes calldata params
+    ) external override returns (bool) {
+        // --- Your logic here ---
+        // e.g., arbitrage, collateral swap, refinancing
+
+        // Approve repayment: amount + premium
+        for (uint i = 0; i < assets.length; i++) {
+            uint256 amountOwed = amounts[i] + premiums[i];
+            IERC20(assets[i]).approve(address(POOL), amountOwed);
+        }
+        return true;
+    }
+}
+```
+
+---
+
+## TypeScript Example (Calling an Existing Receiver)
+
+```typescript
+const pool = new ethers.Contract(POOL_ADDRESS, poolABI, signer);
+
+const tx = await pool.flashLoan(
+  receiverContractAddress,
+  [assetAddress],          // assets
+  [ethers.parseUnits("1000", 6)], // amounts (e.g., 1000 USDC)
+  [0],                     // modes (0 = no debt)
+  signer.address,          // onBehalfOf
+  "0x",                    // params
+  0                        // referralCode
+);
+await tx.wait();
+```
+
+---
+
+## References
+
+- [Pool API Reference](/developers/smartcontracts/core/pool) — full `flashLoan` and `flashLoanSimple` method docs
+- [ACLManager](/developers/smartcontracts/core/accesscontrolmanager) — `FLASH_BORROWER` role management

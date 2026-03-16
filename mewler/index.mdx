@@ -1,0 +1,385 @@
+---
+title: "Mewler Protocol Reference"
+description: "Agent-readable reference for integrating with Mewler, a modular lending protocol on HyperEVM based on Euler V2."
+---
+
+## Package Requirements
+
+```bash
+# JavaScript / TypeScript
+npm install ethers
+# or
+npm install viem
+
+# Solidity (Foundry)
+forge install euler-xyz/euler-interfaces
+
+# Solidity (Hardhat)
+npm install @euler-xyz/euler-interfaces
+```
+
+### ABI Source
+
+Contract ABIs are published in the [euler-interfaces](https://github.com/euler-xyz/euler-interfaces) repository. Import them directly or fetch from the verified contracts on [HyperEVM Explorer](https://hyperevmscan.io).
+
+### RPC Endpoint
+
+Connect to HyperEVM Mainnet. Use any compatible JSON-RPC provider URL.
+
+---
+
+## Contract Addresses (HyperEVM Mainnet)
+
+### Core
+
+- **eVaultFactory**: `0xcF5552580fD364cdBBFcB5Ae345f75674c59273A` — factory for deploying new vaults
+- **eVaultImplementation**: `0x05de079A28386135E048369cdf0Bc4D326d5EBDF` — vault implementation contract
+- **EVC (Ethereum Vault Connector)**: `0xceAA7cdCD7dDBee8601127a9Abb17A974d613db4` — batching, sub-accounts, operators, deferred checks
+- **ProtocolConfig**: `0x43144f09896F8759DE2ec6D777391B9F05A51128` — global protocol parameters
+- **BalanceTracker**: `0x05d14f4eDFA7Cbfb90711C2EC5505bcbd49b9cD2` — cross-vault balance tracking
+- **SequenceRegistry**: `0x47618E4CBDcFBf5f21D6594A7e3a4f4683719994` — operation sequencing
+
+### Periphery
+
+- **EulerEarnFactory**: `0x587DD8285c01526769aB4803e4F02433ddbBc00E` — deploys ERC-4626 earn strategy vaults
+- **Permit2**: `0x000000000022D473030F116dDEE9F6B43aC78BA3` — gasless approvals
+
+### Swap
+
+- **EulerSwapV2Factory**: `0xFbF2a49CB0cc50F4ccd4eAc826eF1A76D99D29Eb`
+- **EulerSwapV2Implementation**: `0xC00F0B7d7B4F7cA3d3f79f3892069f41C142dB84`
+- **EulerSwapV2Periphery**: `0x61aFC386b47a11F8721b67Eb1607cFBd9ccE48B1`
+- **EulerSwapV2ProtocolFeeConfig**: `0x434b1072d96ea24967CDe289D3d4d81d2BAD4F30`
+- **EulerSwapV2Registry**: `0x7E1Efb6A2009A1FDaDee1c5d6615260AD70c14Fb`
+
+### Bridge
+
+- **eulOFTAdapter**: `0x976666e0ae74A8A4059cF1acf706891aDE98C3d1` — OFT adapter for EUL token bridging
+
+Individual vault addresses are deployed dynamically via the factory. Query `eVaultFactory` or use an indexer (TheGraph, Ponder) to enumerate vaults.
+
+For the canonical address list, see: [euler-interfaces/addresses/999](https://github.com/euler-xyz/euler-interfaces/tree/master/addresses/999)
+
+---
+
+## Protocol Overview
+
+Mewler is a modular, permissionless lending protocol deployed on HyperEVM. It is a deployment of Euler V2 and maintains full compatibility with the Euler V2 architecture.
+
+### Architecture
+
+- **Vaults**: Isolated lending markets for individual ERC-20 tokens, each with independent parameters (IRM, oracle, collateral factors). Follows ERC-4626 for share accounting.
+- **EVC**: Ethereum Vault Connector enabling atomic batching, sub-accounts (up to 256 per wallet), operator delegation, and deferred liquidity checks.
+- **Vault Factory**: Deploys new vault instances using EIP-1167 minimal proxy pattern.
+- **Earn Factory**: Deploys yield strategy vaults (ERC-4626).
+- **Lens Contracts**: Read-only data aggregation.
+- **Swap Contracts**: DEX integration for leveraged/multiply positions.
+
+### Vault Types
+
+- **Borrowable**: accepts deposits, pays interest to lenders, allows borrowing of the underlying asset.
+- **Collateral-only**: accepts deposits, pays interest, but underlying cannot be borrowed — used only as collateral in other vaults.
+
+---
+
+## Developer Integration
+
+### Connecting to a Vault
+
+```typescript
+import { ethers } from "ethers";
+
+const provider = new ethers.JsonRpcProvider("YOUR_RPC_URL");
+const signer = await provider.getSigner();
+
+const vaultAddress = "0x..."; // target vault
+const vaultABI = [...]; // from euler-interfaces
+
+const vault = new ethers.Contract(vaultAddress, vaultABI, signer);
+```
+
+### Deposit
+
+```typescript
+async function deposit(vaultAddress: string, amount: bigint) {
+  const vault = new ethers.Contract(vaultAddress, vaultABI, signer);
+  const token = new ethers.Contract(assetAddress, erc20ABI, signer);
+
+  await (await token.approve(vaultAddress, amount)).wait();
+  await (await vault.deposit(amount, signer.address)).wait();
+}
+```
+
+### Borrow
+
+```typescript
+async function borrow(vaultAddress: string, amount: bigint) {
+  const vault = new ethers.Contract(vaultAddress, vaultABI, signer);
+  await (await vault.borrow(amount, signer.address)).wait();
+}
+```
+
+### Query Balances
+
+```typescript
+async function getBalance(vaultAddress: string, user: string) {
+  const vault = new ethers.Contract(vaultAddress, vaultABI, provider);
+  return await vault.balanceOf(user);
+}
+```
+
+### Repay Debt
+
+```typescript
+async function repay(vaultAddress: string, amount: bigint) {
+  const vault = new ethers.Contract(vaultAddress, vaultABI, signer);
+  const token = new ethers.Contract(assetAddress, erc20ABI, signer);
+
+  await (await token.approve(vaultAddress, amount)).wait();
+  await (await vault.repay(amount, signer.address)).wait();
+}
+```
+
+### Withdraw
+
+```typescript
+async function withdraw(vaultAddress: string, amount: bigint) {
+  const vault = new ethers.Contract(vaultAddress, vaultABI, signer);
+  await (await vault.withdraw(amount, signer.address, signer.address)).wait();
+}
+```
+
+---
+
+## EVC Integration
+
+### Connect
+
+```typescript
+const EVC_ADDRESS = "0xceAA7cdCD7dDBee8601127a9Abb17A974d613db4";
+const evcABI = [
+  "function batch(bytes[] calldata calls) external",
+  "function setOperator(address operator, bool enabled) external",
+];
+const evc = new ethers.Contract(EVC_ADDRESS, evcABI, signer);
+```
+
+### Batch Operations (Atomic)
+
+All calls in a batch either succeed together or revert together. Deferred liquidity checks allow intermediate states to temporarily violate health constraints as long as the final state is valid.
+
+```typescript
+async function batchDepositAndBorrow(
+  collateralVault: ethers.Contract,
+  debtVault: ethers.Contract,
+  depositAmount: bigint,
+  borrowAmount: bigint
+) {
+  const calls = [
+    collateralVault.interface.encodeFunctionData("deposit", [depositAmount, userAddress]),
+    debtVault.interface.encodeFunctionData("borrow", [borrowAmount, userAddress]),
+  ];
+  await (await evc.batch(calls)).wait();
+}
+```
+
+### Sub-Accounts
+
+Each wallet supports up to 256 sub-accounts (IDs 0–255). Sub-account addresses share the first 19 bytes of the main address; only the final byte differs.
+
+- Account 0 = main / savings account
+- Accounts 1–255 = isolated position sub-accounts
+
+```typescript
+function getSubAccountAddress(userAddress: string, subAccountId: number): string {
+  return `${userAddress}:${subAccountId}`;
+}
+
+// Deposit to sub-account 1
+await vault.deposit(amount, `${userAddress}:1`);
+```
+
+### Operators
+
+Grant an address permission to execute transactions on your behalf:
+
+```typescript
+await (await evc.setOperator(operatorAddress, true)).wait();
+// Revoke:
+await (await evc.setOperator(operatorAddress, false)).wait();
+```
+
+---
+
+## Creating a Vault
+
+Vaults are deployed via `eVaultFactory` (`0xcF5552580fD364cdBBFcB5Ae345f75674c59273A`) using EIP-1167 minimal proxy pattern.
+
+### Configuration Struct
+
+```solidity
+struct VaultConfig {
+    address underlying;           // ERC-20 token
+    address interestRateModel;    // IRM contract
+    address oracleAdapter;        // Pyth, Chainlink, or custom
+    uint256 collateralFactor;     // Max LTV in basis points (e.g. 7500 = 75%)
+    uint256 liquidationThreshold; // Liquidation LTV in basis points
+    uint256 liquidationDiscount;  // Liquidator bonus in basis points (e.g. 1000 = 10%)
+    bool isBorrowable;            // false = collateral-only
+    address[] hookTargets;        // optional hook contracts
+}
+```
+
+### Deploy
+
+```solidity
+IVaultFactory factory = IVaultFactory(0xcF5552580fD364cdBBFcB5Ae345f75674c59273A);
+address vaultAddress = factory.deployVault(config);
+```
+
+### Typical Collateral Factors
+
+- Stablecoins: 80–90%
+- Major assets (ETH, BTC): 75–85%
+- Altcoins: 50–75%
+- Volatile / long-tail: 30–50%
+
+### Oracle Adapters
+
+Supported: Pyth Network, Chainlink, custom adapters. Each vault can use a different oracle.
+
+---
+
+## Interest Rate Models
+
+Each vault has an IRM that computes rates from utilization:
+
+```
+Utilization = Total Borrowed / Total Deposited
+Supply Rate = Borrow Rate × Utilization × (1 - Reserve Factor)
+```
+
+### IRM Types
+
+**Linear**: `Borrow Rate = Base Rate + (Utilization × Slope)`
+
+**Kinked** (most common):
+```
+if Utilization < Optimal:
+    Borrow Rate = Base + Utilization × Slope1
+else:
+    Borrow Rate = Base + Optimal × Slope1 + (Utilization - Optimal) × Slope2
+```
+Typical optimal utilization: 80–90%. Slope2 >> Slope1 to discourage over-utilization.
+
+**Adaptive**: rates adjust over time based on utilization history.
+
+**Custom**: implement via hook targets.
+
+---
+
+## Liquidations
+
+### Health Score
+
+```
+Health Score = Total Collateral Value / Total Debt Value
+```
+
+- `> 1.0` → safe
+- `= 1.0` → at liquidation threshold
+- `< 1.0` → liquidatable
+
+### Liquidation Mechanics
+
+Anyone can liquidate. Liquidator repays borrower debt and receives collateral at a discount (typically 5–15%).
+
+Partial liquidation is supported: liquidator can repay a portion of the debt and receive proportional collateral + discount.
+
+### Factors Affecting Health Score
+
+- Collateral price decrease → health drops
+- Debt token price increase → health drops
+- Interest accrual on debt → health drops over time
+- Adding collateral / repaying debt → health improves
+
+---
+
+## Share Accounting (ERC-4626)
+
+```
+Share Price = Total Assets / Total Shares
+```
+
+Deposits mint shares (eTokens). Withdrawals burn shares at current price. Interest accrual increases share price over time.
+
+---
+
+## Automation Patterns
+
+### Liquidation Bot
+
+1. Monitor positions via vault `balanceOf` and debt queries
+2. Identify positions with health score < 1.0
+3. Calculate profitability: liquidation discount minus gas cost
+4. Execute liquidation (partial or full)
+
+### Leveraged Position (via EVC batch)
+
+1. Deposit initial collateral
+2. Borrow asset
+3. Swap borrowed asset for more collateral
+4. Deposit additional collateral
+— all in a single atomic batch.
+
+### Position Rebalancing
+
+Batch withdraw + repay + deposit across vaults atomically.
+
+---
+
+## Error Handling
+
+```typescript
+async function safeBatch(calls: string[]) {
+  try {
+    const tx = await evc.batch(calls);
+    await tx.wait();
+    return { success: true };
+  } catch (error) {
+    if (error.message.includes("insufficient balance")) {
+      return { success: false, reason: "Insufficient balance" };
+    }
+    if (error.message.includes("health score")) {
+      return { success: false, reason: "Health score violation" };
+    }
+    return { success: false, reason: error.message };
+  }
+}
+
+// Simulate before executing
+async function validateBatch(calls: string[]) {
+  try {
+    await evc.callStatic.batch(calls);
+    return { valid: true };
+  } catch (error) {
+    return { valid: false, error: error.message };
+  }
+}
+```
+
+---
+
+## Key External References
+
+- ABI + addresses repo: [github.com/euler-xyz/euler-interfaces](https://github.com/euler-xyz/euler-interfaces)
+- Address directory: [euler-interfaces/addresses/999](https://github.com/euler-xyz/euler-interfaces/tree/master/addresses/999)
+- Euler V2 docs: [docs.euler.finance](https://docs.euler.finance/)
+- ERC-4626 spec: [EIP-4626](https://eips.ethereum.org/EIPS/eip-4626)
+- HyperEVM Explorer: [hyperevmscan.io](https://hyperevmscan.io)
+
+## Support
+
+- Telegram: [HypurrFi Community](https://t.me/+YvsBvSxlQrVhNDkx)
+- Discord: [Support Ticket](https://discord.com/invite/CvJPEJjBNn)
+- GitHub: [euler-interfaces](https://github.com/euler-xyz/euler-interfaces)

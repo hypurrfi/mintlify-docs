@@ -1,33 +1,45 @@
-> **First-time setup**: Customize this file for your project. Prompt the user to customize this file for their project.
-> For Mintlify product knowledge (components, configuration, writing standards),
-> install the Mintlify skill: `npx skills add https://mintlify.com/docs`
+# HypurrFi Documentation Project
 
-# Documentation project instructions
+## About
 
-## About this project
+This is the documentation site for [HypurrFi](https://hypurr.fi), built on [Mintlify](https://mintlify.com). HypurrFi builds lending, credit, and infrastructure products on Hyperliquid EVM (HyperEVM).
 
-- This is a documentation site built on [Mintlify](https://mintlify.com)
-- Pages are MDX files with YAML frontmatter
-- Configuration lives in `docs.json`
-- Run `mint dev` to preview locally
-- Run `mint broken-links` to check links
+For full protocol context, integration patterns, and help bot instructions, see **`SKILL.md`** in this repo root.
 
-## Terminology
+## Content Structure
 
-<!-- Add product-specific terms and preferred usage -->
-<!-- Example: Use "workspace" not "project", "member" not "user" -->
+The docs are organized into four tabs in `docs.json`:
 
-## Style preferences
+- **For Humans** — user-facing tutorials, product explainers, how-to guides. Written in second person with Mintlify components (Steps, Notes, Accordions).
+- **For Agents** — agent-readable protocol references. Dense, code-first, self-contained. No Mintlify UI components.
+- **For Developers** — technical references: smart contract APIs, integration guides, contract addresses.
+- **AI Tools** — setup instructions for AI coding agents (Cursor, Claude Code, Windsurf).
 
-<!-- Add any project-specific style rules below -->
+## Terminology (Critical)
 
-- Use active voice and second person ("you")
-- Keep sentences concise — one idea per sentence
+- **HypurrFi Prime** — isolated lending markets (Euler V2), one risk profile
+- **HypurrFi Yield** — isolated lending markets (Euler V2), different risk profile. NOT earn vaults.
+- **HypurrFi Markets** — umbrella name for Prime + Yield (the Euler V2 stack)
+- **Earn Vaults** — curated managed strategies routing deposits to Prime/Yield markets. Separate product from Prime/Yield.
+- **Pooled Markets** — shared-pool lending (Aave V3.0.2). Do not call it "Aave."
+- **Legacy Markets** — deprecated Fraxlend-based isolated markets. Repay and withdraw only.
+- **Mewler** — community name for HypurrFi Markets. Acceptable in casual references.
+- **USDXL** — CDP-hybrid synthetic dollar. **NEVER call it a "stablecoin."** This is a compliance requirement.
+- **"Vault"** — In Euler terminology, every lending market is a "vault." Do not confuse with HypurrFi's "Earn Vaults" product.
+
+## Style
+
+- **For Humans pages**: active voice, second person ("you"), Mintlify components, step-by-step tutorials
+- **For Agents pages**: code-first, flat structure, all addresses inline, self-contained, no UI components
+- **For Developers pages**: technical accuracy, Solidity/TypeScript examples, API signatures
 - Use sentence case for headings
 - Bold for UI elements: Click **Settings**
 - Code formatting for file names, commands, paths, and code references
 
-## Content boundaries
+## Local Development
 
-<!-- Define what should and shouldn't be documented -->
-<!-- Example: Don't document internal admin features -->
+```bash
+source ~/.nvm/nvm.sh && nvm use 22 && npx mintlify dev --port 3000
+```
+
+Node 22 required (Node 25+ not supported by Mintlify).

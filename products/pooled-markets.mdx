@@ -1,0 +1,107 @@
+---
+title: "Pooled Markets"
+description: "HypurrFi pooled markets enable lending, borrowing, and leveraged positions"
+---
+
+HypurrFi Pooled Markets use Aave V3's battle-tested, open source lending contracts to enable a familiar and simple lend and borrow product to earn, manage carry trades (aka looping), and take long or short positions with spot assets.
+
+Pooled Markets let users deposit multiple assets as combined collateral and borrow from a shared liquidity pool. Borrow power is calculated across your whole deposited portfolio rather than per-asset value.
+
+---
+
+## How to Supply
+
+1. Go to [Pooled Markets](https://app.hypurr.fi/markets/pooled) and choose the asset you want to supply
+2. Click into the asset and select **Supply**
+3. Enter the amount you want to deposit
+4. Approve the token if this is your first time
+5. Confirm the transaction
+
+Your supplied assets earn interest from borrowers automatically. You can also toggle whether your deposit counts as **collateral** for borrowing.
+
+## How to Borrow
+
+1. Supply collateral first (see above)
+2. Make sure collateral is enabled for your supplied assets
+3. Select the asset you want to borrow
+4. Click **Borrow** and enter the amount — keep your Health Factor well above 1.0
+5. Review your updated Health Factor and confirm the transaction
+
+Borrowed assets are sent to your wallet. Interest accrues on your debt continuously.
+
+## How to Repay
+
+1. Go to the asset you borrowed and click **Repay**
+2. Enter the amount to repay (partial or full)
+3. Confirm the transaction
+
+Repaying reduces your debt and improves your Health Factor. To fully close a position, repay all debt then withdraw your collateral.
+
+---
+
+## Assets
+
+Assets are added according to a risk framework developed by [Clearstar Labs](https://www.clearstar.xyz/), HypurrFi's independent risk curator. See the [HypurrFi Risk & Analytics Dashboard](https://dune.com/ktabes/hypurrfi-the-hypurrhub-of-finance) for live market data.
+
+Browse available assets at [app.hypurr.fi/markets/pooled](https://app.hypurr.fi/markets/pooled). Click into each asset to see deposit caps, collateralization ratios, LTV, interest rates, and more.
+
+## Glossary
+
+**Supply/Deposit**: Put tokens into the pooled reserve to lend and earn interest
+
+**Borrow**: Take assets from the pool against over-collateralized deposits and pay interest
+
+**Collateral**: Assets you've supplied that count toward borrow power
+
+**LTV (Loan-to-Value)**: Max borrow as % of collateral value, different per asset
+
+**Health Factor (HF)**: Safety score, below 1 = loss of collateral
+
+**Liquidation Threshold & Penalty**: The point where HF would fall to 1; crossing it lets liquidators repay your debt and seize collateral with a protocol-set penalty (e.g., \~8%)
+
+**Supply/Borrow Caps**: Hard limits on how much of an asset can be supplied or borrowed
+
+**Oracle**: The price feed used to assign value to assets
+
+## Common Questions
+
+### What is E-Mode?
+
+Efficiency Mode (E-Mode) boosts LTV within a correlated asset category (e.g., HYPE-correlated or USD-correlated). When you enable a category, you can only borrow within that category, but you get higher LTV and tighter parameters for better capital efficiency.
+
+### Where do prices come from?
+
+HypurrFi uses on-chain oracles: Hyperliquid validator feeds, RedStone, and Pyth for assets.
+
+### How is my Health Factor determined?
+
+Health factor = (collateral value x liquidation threshold)/(borrowed value). So, if you have multiple assets as collateral and/or multiple assets borrowed, use a linear combination.
+
+For example:
+
+* **Collateral 1: HYPE**
+  * a) 500 HYPE
+  * b) Price: \$35
+  * c) Liquidation threshold: 60%
+* **Collateral 2: ETH**
+  * a) 5 ETH
+  * b) Price: \$2800
+  * c) Liquidation threshold: 40%
+* **Borrowed asset 1**: 1000 USDXL
+* **Borrowed asset 2**: 100 HYPE
+
+Health factor = \[(500 x 35 x 0.6) + (5 x 2800 x 0.4)]/\[1000 + (100 x 35)] = 3.58
+
+### How are interest rates calculated?
+
+HypurrFi does not set interest rates, they are determined by utilization with a "kink" model. Below a certain price, the kink, rates climb slowly; above kink, rates climb faster. This keeps liquidity available by encouraging more repayment at higher pool utilization.
+
+### Can you show my liquidiation price?
+
+It's not an easy task to calculate a specific liquidation price with multi-asset collateral and borrow. However, users may wish to use AI tools such as Grok to calculate potential liquidation matrices themselves.
+
+This would be a good hackathon project.
+
+### What are the paw prints next to the assets?
+
+Those represent a multiplier for our points program, if an asset has a 1x multiplier you will receive 1x points for utilizing that asset within our platform, if it has a 3x, you will receive 3x the points, etc.

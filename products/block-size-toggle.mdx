@@ -1,0 +1,34 @@
+---
+title: "Block Size Toggle"
+description: "Choose between fast confirmations or higher gas limits for your transactions"
+---
+
+## What Does This Setting Do?
+
+Hyperliquid processes transactions in two types of blocks. The block size toggle in HypurrFi lets you pick which type your transactions use:
+
+* **Small blocks** (default) — confirms in ~1 second. Best for everyday actions like swaps, deposits, borrows, and repayments.
+* **Big blocks** — confirms in ~1 minute but supports much larger transactions. Use this if a transaction fails due to gas limits.
+
+Most users should leave this on **Small blocks**. You only need Big blocks for unusually large or complex transactions.
+
+## How to Change It
+
+1. Open the HypurrFi app
+2. Go to **Settings**
+3. Under "Set your preferred block size", choose **Small blocks** or **Big blocks**
+
+## When to Use Big Blocks
+
+* A transaction fails with a gas limit error
+* You are deploying or interacting with a complex smart contract
+* You are batching many operations in a single transaction
+
+## Technical Details
+
+Hyperliquid's dual-block architecture splits EVM throughput between the two block types:
+
+* **Small blocks**: every ~1 second, 2M gas limit
+* **Big blocks**: every ~1 minute, 30M gas limit
+
+For more details, see the [Hyperliquid dual-block architecture docs](https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/hyperevm/dual-block-architecture).

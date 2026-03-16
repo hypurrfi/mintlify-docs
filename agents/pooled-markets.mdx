@@ -1,0 +1,366 @@
+---
+title: "Pooled Markets Agent Reference"
+description: "Agent-readable reference for integrating with HypurrFi Pooled Markets (Aave V3.0.2) on HyperEVM."
+---
+
+## Package Requirements
+
+```bash
+npm install ethers
+# or
+npm install viem
+```
+
+### ABI Source
+
+Fetch ABIs from verified contracts on [hyperscan.com](https://hyperscan.com) or reference the [Pool API docs](/developers/smartcontracts/core/pool).
+
+### RPC Endpoint
+
+Connect to HyperEVM Mainnet. Use any compatible JSON-RPC provider URL.
+
+---
+
+## Contract Addresses (HyperEVM Mainnet)
+
+### Core
+
+- **Pool**: `0xceCcE0EB9DD2Ef7996e01e25DD70e461F918A14b` — main entry point for supply, borrow, repay, withdraw, liquidation, flash loans
+- **PoolAddressesProvider**: `0xA73ff12D177D8F1Ec938c3ba0e87D33524dD5594`
+- **PoolConfigurator**: `0x532Bb57DE005EdFd12E7d39a3e9BF8E8A8F544af`
+- **ACLManager**: `0x79CBF4832439554885E4bec9457C1427DFB9D0d3`
+- **WrappedHypeGateway**: `0xd1EF87FeFA83154F83541b68BD09185e15463972` — for native HYPE supply/withdraw
+
+### Implementation
+
+- **PoolImpl**: `0x980BDd9cF1346800F6307E3B2301fFd3ce8C7523`
+- **PoolConfiguratorImpl**: `0x7F4b3CfB3d60aD390E813bc745a44B9030510056`
+- **HyTokenImpl**: `0xa3703e1a77A23A92F21cd5565e5955E98a4fAAcC`
+- **VariableDebtTokenImpl**: `0xdBcF99e5202b2bB9C47182209c7a551524f7c690`
+
+### Data Providers
+
+- **UiPoolDataProvider**: `0x7b883191011AEAe40581d3Fa1B112413808C9c00`
+- **UiIncentiveDataProvider**: `0x8ebA6fc4Ff6Ba4F12512DD56d0E4aaC6081f5274`
+- **ProtocolDataProvider**: `0x895C799a5bbdCb63B80bEE5BD94E7b9138D977d6`
+- **WalletBalanceProvider**: `0xE913De89D8c868aEF96D3b10dAAE1900273D7Bb2`
+
+### Other
+
+- **HyFiOracle**: `0x9BE2ac1ff80950DCeb816842834930887249d9A8`
+- **Treasury**: `0xdC6E5b7aA6fCbDECC1Fda2b1E337ED8569730288`
+- **TreasuryController**: `0x9E6eFa77192DA81E22c8791Ba65c5A5E9795E697`
+- **DefaultInterestRateStrategy**: `0x701B26833A2dFa145B29Ef1264DE3a5240E17bBD`
+
+---
+
+## Key Differences from Aave V3
+
+- **Stable debt is NOT supported** — only variable rate borrowing
+- **RewardsController is NOT currently available**
+- Reserve assets configured for HyperEVM ecosystem
+
+---
+
+## Supply
+
+```typescript
+const POOL_ADDRESS = "0xceCcE0EB9DD2Ef7996e01e25DD70e461F918A14b";
+const poolABI = [
+  "function supply(address asset, uint256 amount, address onBehalfOf, uint16 referralCode) external",
+  "function withdraw(address asset, uint256 amount, address to) external returns (uint256)",
+  "function borrow(address asset, uint256 amount, uint256 interestRateMode, uint16 referralCode, address onBehalfOf) external",
+  "function repay(address asset, uint256 amount, uint256 interestRateMode, address onBehalfOf) external returns (uint256)",
+  "function getUserAccountData(address user) external view returns (uint256 totalCollateralBase, uint256 totalDebtBase, uint256 availableBorrowsBase, uint256 currentLiquidationThreshold, uint256 ltv, uint256 healthFactor)",
+  "function getReservesList() external view returns (address[] memory)",
+];
+
+const pool = new ethers.Contract(POOL_ADDRESS, poolABI, signer);
+const token = new ethers.Contract(assetAddress, erc20ABI, signer);
+
+// Approve then supply
+await (await token.approve(POOL_ADDRESS, amount)).wait();
+await (await pool.supply(assetAddress, amount, signer.address, 0)).wait();
+```
+
+## Borrow
+
+```typescript
+// interestRateMode: 2 = variable (stable debt NOT supported on HypurrFi)
+await (await pool.borrow(assetAddress, amount, 2, 0, signer.address)).wait();
+```
+
+## Repay
+
+```typescript
+await (await token.approve(POOL_ADDRESS, amount)).wait();
+// Use ethers.MaxUint256 to repay full debt
+await (await pool.repay(assetAddress, amount, 2, signer.address)).wait();
+```
+
+## Withdraw
+
+```typescript
+// Use ethers.MaxUint256 to withdraw all
+const withdrawn = await pool.withdraw(assetAddress, amount, signer.address);
+```
+
+## Query Account Data
+
+```typescript
+const data = await pool.getUserAccountData(userAddress);
+const healthFactor = Number(data.healthFactor) / 1e18;
+// healthFactor > 1.0 = safe, < 1.0 = liquidatable
+```
+
+---
+
+## E-Mode (Efficiency Mode)
+
+E-Mode boosts LTV when collateral and debt assets belong to the same correlated category (e.g., USD-correlated stablecoins, HYPE-correlated assets).
+
+### Enable / Disable
+
+```typescript
+// Enable E-Mode for a category (e.g., category 1 = USD-correlated)
+await (await pool.setUserEMode(1)).wait();
+
+// Disable E-Mode
+await (await pool.setUserEMode(0)).wait();
+```
+
+### Query E-Mode
+
+```typescript
+const categoryId = await pool.getUserEMode(userAddress);
+if (categoryId > 0) {
+  const data = await pool.getEModeCategoryData(categoryId);
+  console.log(`LTV: ${data.ltv / 100}%`);
+  console.log(`Liquidation Threshold: ${data.liquidationThreshold / 100}%`);
+  console.log(`Label: ${data.label}`);
+}
+```
+
+### Typical Categories
+
+- **USD-correlated**: USDT0, USDC, USDXL — higher LTV for correlated assets
+- **HYPE-correlated**: HYPE, wstHYPE, kHYPE, beHYPE — higher LTV for HYPE derivatives
+
+### Constraints
+
+- Can only borrow assets within your active E-Mode category
+- Switching categories reverts if you have borrows in a different category
+- Disabling E-Mode reverts if it would drop health factor below liquidation threshold
+
+---
+
+## Flash Loans
+
+### flashLoan (Multi-Asset)
+
+```solidity
+function flashLoan(
+    address receiverAddress,
+    address[] calldata assets,
+    uint256[] calldata amounts,
+    uint256[] calldata modes,        // 0=no debt, 2=variable debt
+    address onBehalfOf,
+    bytes calldata params,
+    uint16 referralCode              // use 0
+) external
+```
+
+- Mode `0`: must repay amount + fee or tx reverts
+- Mode `2`: opens variable debt on `onBehalfOf` (must have collateral + delegated credit)
+- Mode `1` (stable): **NOT supported** on HypurrFi
+
+### flashLoanSimple (Single Asset)
+
+```solidity
+function flashLoanSimple(
+    address receiverAddress,
+    address asset,
+    uint256 amount,
+    bytes calldata params,
+    uint16 referralCode              // use 0
+) external
+```
+
+### IFlashLoanReceiver Interface
+
+```solidity
+interface IFlashLoanReceiver {
+    function executeOperation(
+        address[] calldata assets,
+        uint256[] calldata amounts,
+        uint256[] calldata premiums,
+        address initiator,
+        bytes calldata params
+    ) external returns (bool);
+}
+```
+
+Your `executeOperation` must:
+1. Execute your logic (arbitrage, refinancing, etc.)
+2. Approve the Pool to pull back `amounts[i] + premiums[i]` for each asset
+3. Return `true`
+
+### Fee Structure
+
+```typescript
+const totalPremium = await pool.FLASHLOAN_PREMIUM_TOTAL();      // basis points
+const protocolPremium = await pool.FLASHLOAN_PREMIUM_TO_PROTOCOL();
+// Fee waived for FLASH_BORROWER role (flashLoan only, not flashLoanSimple)
+```
+
+### TypeScript Example
+
+```typescript
+const tx = await pool.flashLoan(
+  receiverContractAddress,
+  [assetAddress],
+  [ethers.parseUnits("1000", 6)],   // e.g., 1000 USDC
+  [0],                               // mode 0 = no debt
+  signer.address,
+  "0x",                              // params
+  0                                  // referralCode
+);
+await tx.wait();
+```
+
+---
+
+## Liquidation
+
+### Health Factor
+
+```
+Health Factor = (Σ collateral_value × liquidation_threshold) / Σ debt_value
+```
+
+- HF > 1.0 → safe
+- HF < 1.0 → liquidatable
+
+### liquidationCall
+
+```solidity
+function liquidationCall(
+    address collateralAsset,
+    address debtAsset,
+    address user,
+    uint256 debtToCover,    // use type(uint256).max for maximum (50% of debt)
+    bool receiveAToken      // true = receive hyTokens, false = underlying
+) external
+```
+
+Liquidator must `approve()` the Pool to spend `debtToCover` of `debtAsset` before calling.
+
+### Monitor Positions
+
+```typescript
+async function findLiquidatablePositions(users: string[]) {
+  const liquidatable = [];
+  for (const user of users) {
+    const data = await pool.getUserAccountData(user);
+    const hf = Number(data.healthFactor) / 1e18;
+    if (hf < 1.0) {
+      liquidatable.push({
+        user,
+        healthFactor: hf,
+        totalCollateral: data.totalCollateralBase,
+        totalDebt: data.totalDebtBase,
+      });
+    }
+  }
+  return liquidatable;
+}
+```
+
+### Calculate Profitability
+
+```typescript
+const config = await pool.getConfiguration(collateralAsset);
+const liquidationBonus = (Number(config) >> 32) & 0xFFFF;
+const bonusPercent = (liquidationBonus - 10000) / 100; // e.g., 5%
+// Profit = (collateral received × bonus%) - gas cost
+```
+
+### Execute Liquidation
+
+```typescript
+const debtToken = new ethers.Contract(debtAsset, erc20ABI, signer);
+await (await debtToken.approve(POOL_ADDRESS, debtToCover)).wait();
+
+const tx = await pool.liquidationCall(
+  collateralAsset,
+  debtAsset,
+  borrowerAddress,
+  debtToCover,       // or ethers.MaxUint256 for max
+  false              // receive underlying asset
+);
+await tx.wait();
+```
+
+---
+
+## Borrowing USDXL
+
+USDXL is a CDP-hybrid synthetic dollar (not a stablecoin). Borrow it the same way as any other asset:
+
+```typescript
+// Supply collateral first, then borrow USDXL
+const USDXL_ADDRESS = "0x..."; // query from pool.getReservesList()
+await (await pool.borrow(USDXL_ADDRESS, amount, 2, 0, signer.address)).wait();
+```
+
+Repay:
+
+```typescript
+const usdxl = new ethers.Contract(USDXL_ADDRESS, erc20ABI, signer);
+await (await usdxl.approve(POOL_ADDRESS, amount)).wait();
+await (await pool.repay(USDXL_ADDRESS, amount, 2, signer.address)).wait();
+```
+
+---
+
+## Error Handling
+
+```typescript
+async function safePoolCall(fn: () => Promise<any>) {
+  try {
+    const tx = await fn();
+    await tx.wait();
+    return { success: true };
+  } catch (error) {
+    if (error.message.includes("HEALTH_FACTOR_LOWER_THAN_LIQUIDATION_THRESHOLD")) {
+      return { success: false, reason: "Would drop health factor below liquidation threshold" };
+    }
+    if (error.message.includes("NOT_ENOUGH_AVAILABLE_USER_BALANCE")) {
+      return { success: false, reason: "Insufficient balance" };
+    }
+    if (error.message.includes("BORROWING_NOT_ENABLED")) {
+      return { success: false, reason: "Borrowing not enabled for this asset" };
+    }
+    if (error.message.includes("STABLE_BORROWING_NOT_ENABLED")) {
+      return { success: false, reason: "Stable borrowing not supported — use variable (mode 2)" };
+    }
+    return { success: false, reason: error.message };
+  }
+}
+```
+
+---
+
+## Key External References
+
+- Pool API: [/developers/smartcontracts/core/pool](/developers/smartcontracts/core/pool)
+- HyFiOracle: [/developers/smartcontracts/core/hyfioracle](/developers/smartcontracts/core/hyfioracle)
+- Contract Addresses: [/developers/addresses](/developers/addresses)
+- Liquidation Guide: [/developers/guides/liquidations](/developers/guides/liquidations)
+- Flash Loan Guide: [/developers/guides/flash-loans](/developers/guides/flash-loans)
+- E-Mode Guide: [/developers/guides/emode](/developers/guides/emode)
+
+## Support
+
+- Telegram: [HypurrFi Community](https://t.me/+YvsBvSxlQrVhNDkx)
+- Discord: [Support Ticket](https://discord.com/invite/CvJPEJjBNn)

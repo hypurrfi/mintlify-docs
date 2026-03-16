@@ -1,0 +1,78 @@
+---
+title: "Legacy Isolated Markets"
+description: "HypurrFi v1 isolated markets for contained risk"
+---
+
+HypurrFi Legacy Isolated Markets are the v1 for contained risk markets. These markets are being deprecated and incentives removed in place of the new HypurrFi Markets detailed below.
+
+Legacy Isolated Markets will remain available as long as assets remain deposited in the markets. However, an incenitve campaign will encourage repayment, withdrawals, and new deposits to the forthcoming HypurrFi (Euler) Market stack as isolated clusters become available.
+
+HypurrFi Legacy Isolated Markets use single-pair, ring-fenced lending vaults. Each market supports one collateral asset and one borrow asset, with all risk contained inside that pair. Collateral supplied in an isolated market backs only the borrow asset in that same market. There is no cross-asset contagion and no interaction with pooled markets or other isolated vaults.
+
+Isolated markets are designed for assets or strategies that require tighter blast-radius control, cleaner risk separation, or experimentation with newer/long-tail tokens.
+
+## Assets
+
+Each isolated pair is risk-scoped independently. Max LTV, liquidation thresholds, rate parameters, and asset eligibility are configured per-market based on collateral quality, liquidity depth, and volatility.
+
+Available isolated markets are listed in-app.
+
+## Glossary
+
+**Deposit**: Add the market's collateral asset to the isolated vault to collateralize your position and borrow.
+
+**Lend**: Add the market's borrow asset for collateralized depositors to borrow the asset and pay you yield.
+
+**Borrow**: Take the paired borrow asset from that market using supplied collateral as backing.
+
+**Isolated Pair**: A single-market configuration where collateral A backs borrow B with zero shared exposure to other markets.
+
+**Max LTV (Loan-to-Value)**: Maximum borrow value as a % of collateral value allowed in that isolated market.
+
+**Liquidation**: If your position exceeds risk limits (due to price moves or high utilization), liquidators can repay your debt and seize only the collateral inside that specific market.
+
+**Health / Safety Buffer**: Margin between your current LTV and liquidation point; maintaining a buffer reduces liquidation risk.
+
+**APY (Supply/Borrow)**: Variable interest rates determined by utilization of that isolated market.
+
+## Common Questions
+
+### Why use isolated instead of pooled?
+
+Isolated markets prevent cross-asset contagion. If a volatile or experimental asset suffers a dislocation, only that isolated pair is affected. This creates safer experimentation and more transparent risk boundaries.
+
+### How do I supply?
+
+Select an isolated market → choose the collateral asset → click Supply → approve + confirm in wallet. Your deposit begins earning supply APY for that market.
+
+### How do I borrow?
+
+First supply collateral in that specific market → navigate to Borrow → choose an amount within Max LTV → confirm. Borrowed tokens are received on HyperEVM.
+
+### What determines how much I can borrow?
+
+Each isolated pair has its own Max LTV, liquidation threshold, and interest-rate parameters. These may be stricter than pooled markets because risk is tuned per asset pair.
+
+### Can I supply in one isolated market and borrow from another?
+
+No. Collateral only backs borrows in the same isolated market.
+
+### Can I lose more than I deposit?
+
+No. The worst-case outcome is liquidation of your collateral in that isolated market to cover your outstanding debt.
+
+### Why did my LTV or risk jump?
+
+Either your collateral price fell or your borrow asset increased in volatility or price. Because markets are isolated, these moves directly and visibly impact your LTV.
+
+### How are rates set?
+
+Interest rates adjust dynamically based on utilization inside that specific isolated market. Higher utilization increases borrow rates and improves supplier yields.
+
+## Risk & Safety Tips
+
+* Maintain a strong safety buffer (targeting the equivalent of HF > 1.3).
+* Avoid borrowing at Max LTV, especially against volatile collateral.
+* Borrow stablecoins against volatile collateral for smoother risk profiles.
+* Monitor positions more closely during high market volatility.
+* Repay or add collateral if utilization and rates spike.
